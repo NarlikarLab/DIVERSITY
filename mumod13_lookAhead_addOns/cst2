@@ -1,3 +1,0 @@
-libctest.getData.restype = POINTER(DataSet)
-libctest.getBackground1.restype = POINTER(POINTER(c_double))
-libctest.trainData.restype = POINTER(TrainOut)
