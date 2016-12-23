@@ -1,0 +1,18 @@
+#!/usr/bin/gnuplot
+
+################################################
+
+# Plots change in likelihood with respect to the number of iterations.
+# It requires the data and output file name as input.
+
+################################################
+
+reset
+set term png size 600, 600
+set output var
+
+unset key
+set xlabel "Iterations"
+set ylabel "Likelihood"
+
+plot filename with lines ls 1 lc rgb '#000000'
