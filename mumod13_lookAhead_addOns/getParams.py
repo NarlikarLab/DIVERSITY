@@ -2,6 +2,7 @@ import re
 import sys
 import os
 
+# function to print all the mumod options when user enters ./mumod
 def printHelp():
     print "Usage:\n./mumod [options]"
     print "\t-f fasta file(compulsory)"
@@ -98,6 +99,7 @@ def validDir(s):    # Check if string is a valid directory
     else: new = s
     return [old, new, defVal]
 
+# get values from command line and process them and store in dictionary
 def getValues():
     d = {'-f': '', '-r': 1, '-a': 1, '-lambda': 0, '-zoops': 0, '-minWidth': 6, '-o': '', '-minMode': 1, '-maxMode': 10, '-initialWidth': 8, '-lcount': 5, '-proc': 0, '-maskReps': 1, '-v': 0}
     dF = {'-f': validFD, '-r': validR, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}

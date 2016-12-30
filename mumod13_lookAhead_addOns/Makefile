@@ -6,7 +6,7 @@ LDFLAGS = -shared
 LM = -lm
 RM = rm -f
 TARGET_LIB = libdatacal.so
-QSRCS = messages.c linkedListOps.c modelops.c motifops.c traindata.c crossValidation.c
+QSRCS = messages.c linkedListOps.c modelops.c motifops.c traindata.c
 VAR = -L$(CURDIR) -Wl,-rpath=$(CURDIR)
 # VAR = -rpath=$(CURDIR)
 OBJS = $(QSRCS:.c=.o)

@@ -39,7 +39,8 @@ def multiEval(d, ds, background, pickleFile):
     # create lists of number of models to learn
     trainOut = map(lambda x: 0, range(d['-maxMode'] - d['-minMode'] + 1))
     modelSeeds = map(lambda x: 0, range(d['-maxMode'] - d['-minMode'] + 1))
-    seeds = map(lambda x: x + 1, range(d['-lcount']))
+    # seeds = map(lambda x: x + 1, range(d['-lcount']))
+    seeds
     params = sum(map(lambda x: map(lambda y: (x, y), seeds), range(d['-minMode'], (d['-maxMode'] + 1))), [])
     counts = [0 for i in range(d['-maxMode'] - d['-minMode'] + 1)]
 

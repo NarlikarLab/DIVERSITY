@@ -3,7 +3,6 @@
 
 typedef struct linkedlist{
   int *modeMotifCount;
-  //  int modeMoitfT;
   struct linkedlist *next;
 }motifStruct;
 

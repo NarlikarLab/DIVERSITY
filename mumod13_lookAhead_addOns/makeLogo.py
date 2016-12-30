@@ -1,6 +1,7 @@
 import weblogoMod.weblogolib as wl
 import sys
 
+# function to create a logo using modified Weblogo3.3 from given sequences
 def createLogo(sequences, filename):
     seqs = wl.read_seq_data(sequences)
     data = wl.LogoData.from_seqs(seqs)
@@ -13,6 +14,7 @@ def createLogo(sequences, filename):
     wl.png_formatter(data, formt, fout)
     fout.close()
 
+# get nucleotide for reverse strand
 def getN(c):
     if c == 'N': return c
     elif c == 'A': return 'T'

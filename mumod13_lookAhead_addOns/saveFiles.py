@@ -4,7 +4,7 @@ import pickle
 import os
 import re
 import plotFigures
-#np.set_printoptions(threshold=np.inf)
+
 
 def readData(dataFile):
     data = []
@@ -19,6 +19,7 @@ def readData(dataFile):
     if tmpData != "": data.append(tmpData)
     return data
 
+# function to return nucleotide in reverse strand
 def getN(c):
     if c == 'N': return c
     elif c == 'A': return 'T'
@@ -30,15 +31,18 @@ def getN(c):
     elif c == 'T': return 'A'
     else: return 'a'
 
+# map A, C, G, T to numbers
 def nToNum(c):
     if c == 'A' or c == 'a': return 0
     elif c == 'C' or c == 'c': return 1
     elif c == 'G' or c == 'g': return 2
     else: return 3
 
+# get reverse strand sequence    
 def reverseSequence(sequence):
     return ''.join(map(lambda x: getN(x), list(sequence))[::-1])
 
+# create logo for given set of sequences using a modifed version of Weblogo3.3
 def createLogo(sequences, filename):
     if sequences == []: return
     seqs = wl.read_seq_data(sequences)
@@ -52,6 +56,7 @@ def createLogo(sequences, filename):
     wl.png_formatter(data, formt, fout)
     fout.close()
 
+# generate PSSM for given motif
 def getPSSM(motif):
     n = len(motif)
     if n == 0: return
@@ -62,6 +67,7 @@ def getPSSM(motif):
     motifArr = np.array(motifArr).transpose()
     return motifArr
 
+# save PSSMs for a given model
 def savePSSMMode(motifs, n, mode, filename, likelihood):
     motifArrays = map(lambda x: getPSSM(x), motifs)
     arr = ["A", "C", "G", "T"]
@@ -80,57 +86,14 @@ def savePSSMMode(motifs, n, mode, filename, likelihood):
                 f.write(str(motifArrays[i][j][k]) + "\t")
             f.write(str(motifArrays[i][j][mLen - 1]) + "]\n")
         f.write("\n\n")
-    #     f.write("A [")
-    #     for j in range(len(motifArrays[i])):
-    #         f.write(str(j).zfill(2) + "\t" + str(motifArrays[i][j][0]) + "\t" + str(motifArrays[i][j][1]) + "\t" + str(motifArrays[i][j][2]) + "\t" + str(motifArrays[i][j][3]) + "\n")
 
-
-    #     f.write("\n\n")
-
-# def getPSSM(motif):
-#     n = len(motif)
-#     if n == 0: return
-#     mWidth = len(motif[0])
-#     motifArr = np.array(map(lambda x: map(lambda y: nToNum(y), list(x)), motif)).transpose()
-#     motifArr = map(lambda x: np.bincount(x, minlength = 4), motifArr)
-#     motifArr = map(lambda x: map(lambda y: y/(1.0 * n), x), motifArr)
-#     return motifArr
-
-# def savePSSMMode(motifs, n, mode, filename, likelihood):
-#     motifArrays = map(lambda x: getPSSM(x), motifs)
-    
-#     f = open(filename, "w")
-#     f.write("\nNumber of sequences: " + str(n) + "\nNumber of modes: " + str(mode) + "\nLikelihood: " + str(likelihood) + "\n\n")
-#     for i in range(mode):
-#         f.write("\nMODE: " + str(i) + " (" + str(len(motifs[i])) + " sequences)\n\n")
-#         if motifArrays[i] is None: continue
-#         f.write("PO\tA\tC\tG\tT\n");
-#         for j in range(len(motifArrays[i])):
-#             f.write(str(j).zfill(2) + "\t" + str(motifArrays[i][j][0]) + "\t" + str(motifArrays[i][j][1]) + "\t" + str(motifArrays[i][j][2]) + "\t" + str(motifArrays[i][j][3]) + "\n")
-#         f.write("\n\n")
-
+# save PSSMs for all models
 def savePSSM(motifs, n, minMode, maxMode, dirname, likelihoods):
     for i in range(minMode, maxMode + 1):
         savePSSMMode(motifs[i - minMode], n, i, dirname + "/mode_" + str(i) + "/pssm.txt", likelihoods[i - minMode])
 
+# save logos for a given model
 def saveLogosMode(dataFile, trainOut, mode, dirname):
-    # data = []
-    # # j = 0
-    # # n = 0
-    # tmpData = ""
-    # with open(dataFile) as infile:
-    #     for line in infile:
-    #         if line[0] == '>':
-    #             if tmpData != "": data.append(tmpData)
-    #             tmpData = ""
-    #         else:
-    #             tmpData = tmpData + line.strip()
-    # if tmpData != "": data.append(tmpData)
-    #         # if(j%2 == 1): 
-    #         #     data.append(line[:-1])
-    #         #     # n = n + 1
-    #         # j = j + 1
-
     data = readData(dataFile)
     n = len(trainOut['labels'])
     start = []
@@ -162,29 +125,15 @@ def saveLogosMode(dataFile, trainOut, mode, dirname):
         createLogo(map(lambda x: reverseSequence(x), dataList[i]), dirname + "/logo_rev_" + str(i) + ".png")
     return dataList
 
+# save model information for a given model
 def saveInfoFileMode(dataFile, trainOut, mode, filename):
-    # data = []
     seqName = []
-    # j = 0
-    # n = 0
-
     with open(dataFile) as infile:
         for line in infile:
             if line[0] == '>':
                 tmp = re.search(r'chr[0-9a-zA-Z]+:[0-9]+-[0-9]+', line[1:])
                 if tmp: seqName.append((tmp.group(0)).strip())
                 else: seqName.append((line[1:]).strip())
-                
-    # with open(dataFile) as infile:
-    #     for line in infile:
-    #         if(j%2 == 1):
-    #             data.append(line[:-1])
-    #             # n = n + 1
-    #         else:
-    #             tmp = re.search(r'chr[0-9a-zA-Z]+:[0-9]+-[0-9]+', line[1:])
-    #             if tmp: seqName.append((tmp.group(0)).strip())
-    #             else: seqName.append((line[1:]).strip())
-    #         j = j + 1
 
     data = readData(dataFile)
     n = len(trainOut['labels'])
@@ -192,9 +141,6 @@ def saveInfoFileMode(dataFile, trainOut, mode, filename):
     label = []
     width = []
     strand = []
-
-    # print "N", n
-    # print "Labels length", len(trainOut['labels'])
 
     for i in range(n):
         label.append(trainOut['labels'][i])
@@ -230,10 +176,12 @@ def saveInfoFileMode(dataFile, trainOut, mode, filename):
             j = j + 1
     f.close()
 
+# save model information for all learned models
 def saveInfoFiles(d, trainOut):
     for i in range(d['-maxMode'] - d['-minMode'] + 1):
         saveInfoFileMode(d['-f'], trainOut[i], i + d['-minMode'], d['-o'][1] + "/mode_" + str(i + d['-minMode']) + "/info.txt")
 
+# save logos for all learned models
 def saveLogos(d, trainOut):
     motifs = []
     for i in range(d['-maxMode'] - d['-minMode'] + 1):
@@ -241,35 +189,31 @@ def saveLogos(d, trainOut):
         motifs.append(tmp)
     return motifs
 
+
+# remove redundant files
 def removeMultipleLikes(startMode, endMode, trials, dirname, lcount):
     for i in range(startMode, endMode + 1):
         os.system("cp " + dirname + "/mode_" + str(i) + "/likes_" + str(trials[i - startMode]) + ".txt" + " " + dirname + "/mode_" + str(i) + "/likes.txt")
         for j in range(lcount):
             os.system("rm -f " + dirname + "/mode_" + str(i) + "/likes_" + str(j + 1) + ".txt")
 
+# remove redundant files
 def removeMultipleLikesMode(mode, seed, dirname, lcount):
-    #    for i in range(startMode, endMode + 1):
     os.system("cp " + dirname + "/mode_" + str(mode) + "/likes_" + str(seed) + ".txt" + " " + dirname + "/mode_" + str(mode) + "/likes.txt")
     for j in range(lcount):
         os.system("rm -f " + dirname + "/mode_" + str(mode) + "/likes_" + str(j + 1) + ".txt")
 
+# save model in binary format in python pickle form
 def saveBinaryOut(trainOut, filename):
     l = [(x['likelihood'], x['motifWidth']) for x in trainOut]
     o = pickle.dump(l, open(filename, "wb"))
 
+# save model information
 def saveModeDetails(d, trainOut, seed, mode):
     os.system("cp -r " + d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(seed) + "/* " + d['-o'][1] + "/mode_" + str(mode) + "/")
-    # if d['-v'] != 0:
-    #     removeMultipleLikesMode(mode, seed, d['-o'][1], d['-lcount'])
-    #     plotFigures.plotLikelihoodMode(d, mode)
-    # saveInfoFileMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/info.txt")
-    # motifs = saveLogosMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode))
-    # savePSSMMode(motifs, len(trainOut['labels']), mode, d['-o'][1] + "/mode_" + str(mode) + "/pssm.txt", trainOut['likelihood'])
 
+# save model information for all trials
 def saveModeTrialDetails(d, trainOut, trial, mode):
-    # if d['-v'] != 0:
-    #     removeMultipleLikesMode(mode, seed, d['-o'][1], d['-lcount'])
-    #     plotFigures.plotLikelihoodMode(d, mode)
     if d['-v'] != 0: plotFigures.plotSingleFile(d, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial))
     saveInfoFileMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial) + "/info.txt")
     motifs = saveLogosMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial))
@@ -277,11 +221,4 @@ def saveModeTrialDetails(d, trainOut, trial, mode):
     
 def saveDetails(d, to):
     trainOut, modelSeeds = zip(*to)
-    # likelihoods = [x['likelihood'] for x in trainOut]
-    # if d['-v'] != 0: 
-    #     removeMultipleLikes(d['-minMode'], d['-maxMode'], modelSeeds, d['-o'][1], d['-lcount'])
-    #     plotFigures.plotLikelihood(d)
-    # saveInfoFiles(d, trainOut)
-    # motifs = saveLogos(d, trainOut)
-    # savePSSM(motifs, len(trainOut[0]['labels']), d['-minMode'], d['-maxMode'], d['-o'][1], likelihoods)
     saveBinaryOut(trainOut, d['-o'][1] + "/models.bin.p")

@@ -4,6 +4,7 @@ from getParams import *
 import evaluate as ev
 import saveFiles as sf
 
+# print execution information
 def printDetails(d):
     print "\n\nProcessing details:\n"
     if d['-o'][2] != 0:
@@ -17,6 +18,7 @@ def printDetails(d):
     print "PSSMs for all motifs of every mode would be saved as " + d['-o'][1] + "/pssm.txt"
     print "\n\n"
 
+# function that calls the training function and then calls another function to save details
 def getModel(d):
     dirname = d['-o'][1]
     n = mp.cpu_count()

@@ -1,11 +1,13 @@
 import os
 
+# plot a single likelihood file
 def plotSingleFile(d, dirname):
     f1 = dirname + "/likes.txt"
     f2 = dirname + "/likes.png"
     os.system("gnuplot -e 'filename=\"" + f1 + "\"; var=\"" + f2 + "\"' " + d['-v'])
     os.system("rm " + f1)
 
+# plot likelihood for all modes in different files
 def plotLikelihood(d):
     for i in range(d['-minMode'], d['-maxMode'] + 1):
         f1 = d['-o'][1] + "/mode_" + str(i) + "/likes.txt"

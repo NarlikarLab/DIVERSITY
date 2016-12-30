@@ -6,25 +6,17 @@
 #include "modelops.h"
 #include "motifops.h"
 #include "traindata.h"
-#include "crossValidation.h"
 int main(){
 
-  dataSet *ds, *dsT, *dsL;
-  model *m;
-  int *labels, *startPos, mode, i, j, k, k1, *lpc, *spc, minWidth, maxWidth;
+  dataSet *ds;
+  int mode, i, k, minWidth;
   unsigned int seed;
   float alpha;
   double l1, zoops;
   double **background;
-  int **featureCounts;
-  FILE *fp, *fp3;
   char *fstr;
   trainOut *l;
-  int kfold;
-  int *posL, *mWidth, bestMode;
-  trainOut *savedTo;
-  double cvL, bestCVL, tmpCVL, tmpL, like;
-  char *strName;
+  int *mWidth;
   mode = 8;
   fstr = "likes.txt";
   float lambda;
@@ -32,10 +24,7 @@ int main(){
   alpha = 1;
   zoops = 0;
   lambda = 0;
-  bestCVL = 0;
   minWidth = 6;
-  maxWidth = 15;
-  kfold = 5;
   //  ds = getData("new_data_1.txt", "test.txt", 1, 1);
   ds = getData("../mumodData/GSM602326_dmel_summit_201bp.fa", "test.txt", 1, 1);
   /* for(i = 0; i < ds->n; i++){ */
@@ -50,7 +39,7 @@ int main(){
   //  ds = getData("../../mumodData/GSM602335_dpse_summit_201bp.fa", "test.txt", 1);
 
   //  featureCounts = getFeatureCounts(ds, mode, 8);
-  background = getBackground1(ds, 2);
+  background = getBackground(ds, 2);
 
   /* printf("Counts:\n"); */
   /* for(i = 0; i < ds->n; i++){ */
@@ -76,95 +65,95 @@ int main(){
     printf("\n");
     if(l1 == 0 || l->likelihood > l1){
       l1 = l->likelihood;
-      savedTo = l;
     }
   }
-  fp = fopen("learnedLabels.txt", "w");
-  for(i = 0; i < ds->n; i++) fprintf(fp, "%d\n", (savedTo->labels)[i]);
-  fclose(fp);
-  fp = fopen("learnedStart.txt", "w");
-  for(i = 0; i < ds->n; i++) fprintf(fp, "%d\n", (savedTo->startPos)[i]);
-  fclose(fp);
-  fp = fopen("learnedWidth.txt", "w");
-  for(i = 0; i < mode; i++) fprintf(fp, "%d\n", (savedTo->motifWidth)[i]);
-  fclose(fp);
+  
+  /* fp = fopen("learnedLabels.txt", "w"); */
+  /* for(i = 0; i < ds->n; i++) fprintf(fp, "%d\n", (savedTo->labels)[i]); */
+  /* fclose(fp); */
+  /* fp = fopen("learnedStart.txt", "w"); */
+  /* for(i = 0; i < ds->n; i++) fprintf(fp, "%d\n", (savedTo->startPos)[i]); */
+  /* fclose(fp); */
+  /* fp = fopen("learnedWidth.txt", "w"); */
+  /* for(i = 0; i < mode; i++) fprintf(fp, "%d\n", (savedTo->motifWidth)[i]); */
+  /* fclose(fp); */
 
-  exit(0);
-  posL = posList(ds->n);
+  /* exit(0); */
+  /* posL = posList(ds->n); */
 
-  for(i = 2; i < 11; i++){
-    printf("MODEL: %d modes\n", i);
-    mWidth = (int*)malloc(sizeof(int)*i);
-    cvL = 0;
-    like = 0;
-    for(j = 0; j < i; j++) mWidth[j] = 8;
-    for(j = 0; j < kfold; j++){
-      printf("Fold: %d\n", j);
-      dsT = getTrainSubset(ds, j, kfold, posL);
-      /* featureCounts = getFeatureCounts(dsT, minWidth, maxWidth); */
-      /* for(k = 0; k < dsT->n; k++){ */
-      /* 	for(k1 = 0; k1 < maxWidth - minWidth + 1; k1++){ */
-      /* 	  printf("%d\t", featureCounts[k][k1]); */
-      /* 	} */
-      /* 	printf("\n"); */
-      /* } */
-      /* exit(0); */
+  /* for(i = 2; i < 11; i++){ */
+  /*   printf("MODEL: %d modes\n", i); */
+  /*   mWidth = (int*)malloc(sizeof(int)*i); */
+  /*   cvL = 0; */
+  /*   like = 0; */
+  /*   for(j = 0; j < i; j++) mWidth[j] = 8; */
+  /*   for(j = 0; j < kfold; j++){ */
+  /*     printf("Fold: %d\n", j); */
+  /*     dsT = getTrainSubset(ds, j, kfold, posL); */
+  /*     /\* featureCounts = getFeatureCounts(dsT, minWidth, maxWidth); *\/ */
+  /*     /\* for(k = 0; k < dsT->n; k++){ *\/ */
+  /*     /\* 	for(k1 = 0; k1 < maxWidth - minWidth + 1; k1++){ *\/ */
+  /*     /\* 	  printf("%d\t", featureCounts[k][k1]); *\/ */
+  /*     /\* 	} *\/ */
+  /*     /\* 	printf("\n"); *\/ */
+  /*     /\* } *\/ */
+  /*     /\* exit(0); *\/ */
 
-      background = getBackground1(dsT, 2);
-      l1 = 0;
-      for(k = 0; k < 5; k++){
-	printf("Trial: %d\n", k);
-	seed = k + 1;
-	l = trainData(dsT, i, alpha, lambda, zoops, seed, background, mWidth, minWidth, fstr);
-	//	printf("HERE!!\n");
-	if(k == 0){
-	  savedTo = l;
-	}
-	else if(l->likelihood > l1){
-	  l1 = l->likelihood;
-	  freeTo(savedTo);
-	  savedTo = l;
-	}
-	else{
-	  freeTo(l);
-	}
-      }
+  /*     background = getBackground1(dsT, 2); */
+  /*     l1 = 0; */
+  /*     for(k = 0; k < 5; k++){ */
+  /* 	printf("Trial: %d\n", k); */
+  /* 	seed = k + 1; */
+  /* 	l = trainData(dsT, i, alpha, lambda, zoops, seed, background, mWidth, minWidth, fstr); */
+  /* 	//	printf("HERE!!\n"); */
+  /* 	if(k == 0){ */
+  /* 	  savedTo = l; */
+  /* 	} */
+  /* 	else if(l->likelihood > l1){ */
+  /* 	  l1 = l->likelihood; */
+  /* 	  freeTo(savedTo); */
+  /* 	  savedTo = l; */
+  /* 	} */
+  /* 	else{ */
+  /* 	  freeTo(l); */
+  /* 	} */
+  /*     } */
 
-      for(k = 0; k < dsT->n; k++) free(background[k]);
-      free(background);
-      /* for(k = 0; k < dsT->n; k++) free(featureCounts[k]); */
-      /* free(featureCounts); */
-      dsL = getTestSubset(ds, j, kfold, posL);
-      //      dsL = getTrainSubset(ds, j, kfold, posL);
-      background = getBackground1(dsL, 2);
-      ///////////////////////////////////////////////// STR COPY ////////////////////////////////////////////////////
+  /*     for(k = 0; k < dsT->n; k++) free(background[k]); */
+  /*     free(background); */
+  /*     /\* for(k = 0; k < dsT->n; k++) free(featureCounts[k]); *\/ */
+  /*     /\* free(featureCounts); *\/ */
+  /*     dsL = getTestSubset(ds, j, kfold, posL); */
+  /*     //      dsL = getTrainSubset(ds, j, kfold, posL); */
+  /*     background = getBackground1(dsL, 2); */
+  /*     ///////////////////////////////////////////////// STR COPY //////////////////////////////////////////////////// */
 
-      strName = malloc(sizeof(char)*(9 + 6 + 4 + (floor(log10(abs(i)))) + 1 + 1));
-      strName[0] = '\0';
-      sprintf(strName, "mode%dfold%dlabels.txt", i, j);
-      printf("%s\n", strName);
-      fp = fopen(strName, "w");
-      for(k = 0; k < dsT->n; k++) fprintf(fp, "%d\n", (savedTo->labels)[k]);
-      fclose(fp);
-      free(strName);
+  /*     strName = malloc(sizeof(char)*(9 + 6 + 4 + (floor(log10(abs(i)))) + 1 + 1)); */
+  /*     strName[0] = '\0'; */
+  /*     sprintf(strName, "mode%dfold%dlabels.txt", i, j); */
+  /*     printf("%s\n", strName); */
+  /*     fp = fopen(strName, "w"); */
+  /*     for(k = 0; k < dsT->n; k++) fprintf(fp, "%d\n", (savedTo->labels)[k]); */
+  /*     fclose(fp); */
+  /*     free(strName); */
 
-      strName = malloc(sizeof(char)*(9 + 5 + 4 + (floor(log10(abs(i)))) + 1 + 1));
-      strName[0] = '\0';
-      sprintf(strName, "mode%dfold%dstart.txt", i, j);
-      printf("%s\n", strName);
-      fp = fopen(strName, "w");
-      for(k = 0; k < dsT->n; k++) fprintf(fp, "%d\n", (savedTo->startPos)[k]);
-      fclose(fp);
-      free(strName);
+  /*     strName = malloc(sizeof(char)*(9 + 5 + 4 + (floor(log10(abs(i)))) + 1 + 1)); */
+  /*     strName[0] = '\0'; */
+  /*     sprintf(strName, "mode%dfold%dstart.txt", i, j); */
+  /*     printf("%s\n", strName); */
+  /*     fp = fopen(strName, "w"); */
+  /*     for(k = 0; k < dsT->n; k++) fprintf(fp, "%d\n", (savedTo->startPos)[k]); */
+  /*     fclose(fp); */
+  /*     free(strName); */
 
-      strName = malloc(sizeof(char)*(9 + 5 + 4 + (floor(log10(abs(i)))) + 1 + 1));
-      strName[0] = '\0';
-      sprintf(strName, "mode%dfold%dwidth.txt", i, j);
-      printf("%s\n", strName);
-      fp = fopen(strName, "w");
-      for(k = 0; k < i; k++) fprintf(fp, "%d\n", (savedTo->motifWidth)[k]);
-      fclose(fp);
-      free(strName);
+  /*     strName = malloc(sizeof(char)*(9 + 5 + 4 + (floor(log10(abs(i)))) + 1 + 1)); */
+  /*     strName[0] = '\0'; */
+  /*     sprintf(strName, "mode%dfold%dwidth.txt", i, j); */
+  /*     printf("%s\n", strName); */
+  /*     fp = fopen(strName, "w"); */
+  /*     for(k = 0; k < i; k++) fprintf(fp, "%d\n", (savedTo->motifWidth)[k]); */
+  /*     fclose(fp); */
+  /*     free(strName); */
       ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
       
       /* m = createModel(i, dsT, savedTo->labels, savedTo->startPos, alpha, lambda, zoops, savedTo->motifWidth); */
@@ -184,21 +173,22 @@ int main(){
       /* like = like + tmpL; */
       /* //      printf("CVL: %lf\n", cvL); */
       /* freeModel(m); */
-      freeData(dsL);
-      freeData(dsT);
-      freeTo(savedTo);
-    }
-    cvL = cvL/5;
-    like = like/5;
-    printf("Average: %lf\n", cvL);
-    printf("Average Likelihood: %lf\n", like);
-    if(bestCVL == 0 || cvL > bestCVL){
-      bestCVL = cvL;
-      bestMode = i;
-    }
-    free(mWidth);
-  }
-  printf("Best MODEL: %d modes\n", bestMode);
+      /* freeData(dsL); */
+      /* freeData(dsT); */
+      /* freeTo(savedTo); */
+      /* } */
+
+  /*   cvL = cvL/5; */
+  /*   like = like/5; */
+  /*   printf("Average: %lf\n", cvL); */
+  /*   printf("Average Likelihood: %lf\n", like); */
+  /*   if(bestCVL == 0 || cvL > bestCVL){ */
+  /*     bestCVL = cvL; */
+  /*     bestMode = i; */
+  /*   } */
+  /*   free(mWidth); */
+  /* } */
+  /* printf("Best MODEL: %d modes\n", bestMode); */
   freeData(ds);
 
 

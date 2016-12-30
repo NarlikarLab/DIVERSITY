@@ -17,8 +17,6 @@ typedef struct modelstruct{
   motifContainer *motifs;
   int *t;
   int *mWidth;
-  /* int minWidth; */
-  /* int maxWidth; */
   float alpha;
   float lambda;
   double zoops;
@@ -32,7 +30,7 @@ typedef struct trainout{
 }trainOut;
 
 dataSet* getData(char*, char*, int, int);
-double** getBackground1(dataSet*, int);
+double** getBackground(dataSet*, int);
 int maxWithoutN(int*, int, int);
 int getIndex(int*, int, int, int);
 void freeData(dataSet*);
@@ -41,15 +39,12 @@ model* initializeModel(int, int, int*);
 void copyModel(model*, model*);
 void freeModel(model*);
 void freeTo(trainOut*);
-/* void getCount(model*, int*, dataSet*); */
-/* void getBackground(model*, dataSet*); */
 void getMotifCount(model*, dataSet*, int*, int*);
 int* sampleArrayVals(int, int, int, unsigned int*);
 int* sampleStart(int, int, int, int, unsigned int*);
 void logToExp(double*, int);
 int sample(double*, int, double);
 void bubbleSort(double*, int*, int);
-void bubble(double*, int*, int, int);
 int arrayMax(double*, int);
 void copyLabels(int*, int*, int);
 int motifWithN(int*, int, int);

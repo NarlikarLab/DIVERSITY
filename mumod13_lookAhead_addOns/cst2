@@ -1,3 +1,7 @@
+# second half of the cstructures.py file
+
+# state return types of c functions that are to be called from python
+
 libctest.getData.restype = POINTER(DataSet)
-libctest.getBackground1.restype = POINTER(POINTER(c_double))
+libctest.getBackground.restype = POINTER(POINTER(c_double))
 libctest.trainData.restype = POINTER(TrainOut)

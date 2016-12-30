@@ -1,7 +1,6 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
-//#include<gsl/gsl_fit.h>
 #include "messages.h"
 #include "linkedListOps.h"
 #include "modelops.h"
@@ -11,58 +10,14 @@
 FILE *fp;
 int citer;
 
+/* Compute slope for given set likelihood values */
 double linearSlope(queueStruct *q, double xsum, double ysum, double xxsum, double xysum, int n){
   double a1;
   a1 = (n * xysum - xsum * ysum) / (n * xxsum - xsum * xsum);
   return a1;
 }
 
-double corrCoef(int *x, double *y, int n){
-  double *xx, *yy, *xy, xsum, ysum, xxsum, yysum, xysum, num, denom;
-  int i;
-  xx = (double*)malloc(sizeof(double)*n);
-  if(!xx) printMessages(0, NULL);
-  yy = (double*)malloc(sizeof(double)*n);
-  if(!yy) printMessages(0, NULL);
-  xy = (double*)malloc(sizeof(double)*n);
-  if(!xy) printMessages(0, NULL);
-  xsum = 0; ysum = 0; xxsum = 0; yysum = 0; xysum = 0;
-  for(i = 0; i < n; i++){
-    xy[i] = (double)x[i] * y[i];
-    xx[i] = (double)x[i] * x[i];
-    yy[i] = y[i] * y[i];
-    xsum = xsum + (double)x[i];
-    ysum = ysum + y[i];
-    xxsum = xxsum + xx[i];
-    yysum = yysum + yy[i];
-    xysum = xysum + xy[i];
-  }
-  num = n*xysum - xsum * ysum;
-  denom = (n * xxsum - xsum * xsum) * (n * yysum - ysum * ysum);
-  free(xx);
-  free(yy);
-  free(xy);
-  //  printf("Numerator: %lf\t Denominator: %lf\n", num, denom);
-  if(denom < 0.00001) return 0;
-  return num/sqrt(denom);
-}
-
-double avgCorrCoef(model *m, dataSet *ds, int *labels, int *startPos, double **background, int **labelcounts){
-  double *values, corrcoef, tmp;
-  int i, j;
-  values = (double*)malloc(sizeof(double)*m->mode);
-  if(!values) printMessages(0, NULL);
-  corrcoef = 0;
-  for(i = 0; i < ds->n; i++){
-    addRemoveDataPoint(m, ds, labels, startPos, i, -1);
-    for(j = 0; j < m->mode; j++) values[j] = likelihoodXi(m, ds, j, startPos[i], i, background[i]);
-    corrcoef = corrcoef + corrCoef(labelcounts[i], values, m->mode);
-    addRemoveDataPoint(m, ds, labels, startPos, i, 1);
-  }
-  free(values);
-  return corrcoef/ds->n;
-}
-
+/* Enqueue a likelihood value */
 void enqueue(queueStruct *queue, int *front, int *rear, int *isFull, int size, double value, double *sum, double *sumxy){
   if(*isFull == size) dequeue(queue, front, rear, size, sum, sumxy);
   if(*front == -1) *front = *rear = 0;
@@ -71,13 +26,9 @@ void enqueue(queueStruct *queue, int *front, int *rear, int *isFull, int size, d
   *sum = *sum + value;
   if(sumxy != NULL) *sumxy = *sumxy + value * (*rear + 1);
   if(*isFull < size) *isFull = *isFull + 1;
-  /* int i; */
-  /* printf("Queue sum: %lf, Average: %lf\n", *sum, *sum/size); */
-  /* printf("Queue values:\n"); */
-  /* for(i = 0; i < *isFull; i++) printf("%lf\t", queue[i]); */
-  /* printf("\n"); */
 }
 
+/* Dequeue a likelihood value */
 void dequeue(queueStruct *queue, int *front, int *rear, int size, double *sum, double *sumxy){
   *sum = *sum - queue[*front].y;
   if(sumxy != NULL) *sumxy = *sumxy - queue[*front].y * (*front + 1);
@@ -85,6 +36,7 @@ void dequeue(queueStruct *queue, int *front, int *rear, int size, double *sum, d
   else *front = (*front + 1)%size;
 }
 
+/* Remove sequence from data set */
 void addRemoveDataPoint(model *m, dataSet *ds, int *labels, int *startPos, int index, int ar){
   int i, mode;
   motifStruct *m1;
@@ -100,35 +52,15 @@ void addRemoveDataPoint(model *m, dataSet *ds, int *labels, int *startPos, int i
   }
 }
 
+/* Compute parameters that maximize the posterior */
 int bestPosteriorParameters(dataSet *ds, model *m, double *background, int *labels, int *startPos, int index, int *t, int n, int fv){
-  int i, j, k, c, id, posID, modeID;
-  double s, s1, max, *priors;
+  int i, j, c, id;
+  double s, s1, max;
   max = -1;
   id = 0;
   c = 0;
-  posID = 0;
-  modeID = 0;
   for(i = 0; i < m->mode; i++){
     s1 = (double)(t[i] + m->alpha)/(n + m->mode*m->alpha);
-    /* j = 0; */
-    /* while(j < (ds->features)[index]){ */
-    /*   if((ds->lookAhead)[index][j] < (m->mWidth)[i]){ */
-    /* 	s = -1; */
-    /* 	j = j + (ds->lookAhead)[index][j] + 1; */
-    /*   } */
-    /*   else{ */
-    /* 	s = likelihoodXi(m, ds, i, j, index, background); */
-    /* 	if(s < 0.00001) s = -1; */
-    /* 	else s = s * s1; */
-    /* 	j++; */
-    /*   } */
-    /*   if(s > max){ */
-    /* 	max = s; */
-    /* 	id = c; */
-    /*   } */
-    /*   c++; */
-    /* } */
-
     for(j = 0; j < (ds->features)[index]; j++){
       s = likelihoodXi(m, ds, i, j, index, background);
       if(s < 0.00001) s = -1;
@@ -150,6 +82,7 @@ int bestPosteriorParameters(dataSet *ds, model *m, double *background, int *labe
   return id;
 }
 
+/* Update the best model */
 int updateBestModel(dataSet *ds, model *m, double **background, int *labels, int *startPos, int fv){
   int i, c, flag, start, label, n;
   int *tmpCount;
@@ -185,25 +118,7 @@ int updateBestModel(dataSet *ds, model *m, double **background, int *labels, int
   return flag;
 }
 
-int* getStartIndices(model *m, dataSet *ds, int mode, int index, unsigned int *seed, int flag, double *background){
-  int i;
-  int *indices;
-  double *values;
-  indices = (int*)malloc(sizeof(int)*(ds->features)[index]);
-  if(!indices) printMessages(0, NULL);
-  values = (double*)malloc(sizeof(double)*(ds->features)[index]);
-  if(!values) printMessages(0, NULL);
-  for(i = 0; i < (ds->features)[index]; i++){
-    indices[i] = i;
-    values[i] = likelihoodXi(m, ds, mode, i, index, background);
-  }
-  bubbleSort(values, indices, (ds->features)[index]);
-  //  printf("Index: %d, Indices: %d, %d, %d, %d, Values: %lf, %lf, %lf, %lf\n", index, indices[0], indices[1], indices[2], indices[3], values[0], values[1], values[2], values[3]);
-
-  free(values);
-  return indices;
-}
-
+/* Compute posterior */
 double calculateFullPosterior(dataSet *ds, model *m, double **background, int *labels, int *startPos, int **featureCounts){
   double s, s1;
   int i, j, k;
@@ -220,8 +135,6 @@ double calculateFullPosterior(dataSet *ds, model *m, double **background, int *l
       }
       m1 = m1->next;
     }
-
-    /* printf("S_1: %lf\n", s); */
   }
   for(i = 0; i < ds->n; i++){
     if(startPos[i] == -1){
@@ -233,7 +146,6 @@ double calculateFullPosterior(dataSet *ds, model *m, double **background, int *l
     if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log(featureCounts[i][labels[i]]);
     else if(m->zoops == 1) s = s - log(featureCounts[i][labels[i]] + 1);
     else s = s - log(featureCounts[i][labels[i]]);
-    /* printf("S_3: %lf\n", s); */
     m1 = (m->motifs)[labels[i]].motif;
     for(j = 0; j < (m->mWidth)[labels[i]]; j++){
       s = s + log((m1->modeMotifCount)[(ds->data)[i][j + startPos[i]]] + 0.5) - log((m->t)[labels[i]] + m->featureValues*0.5);
@@ -241,61 +153,14 @@ double calculateFullPosterior(dataSet *ds, model *m, double **background, int *l
     }
     for(j = 0; j < startPos[i]; j++) if(background[i][j] > 0.00001) s = s + log(background[i][j]);
     for(j = startPos[i] + (m->mWidth)[labels[i]]; j < (ds->features)[i]; j++) if(background[i][j] > 0.00001) s = s + log(background[i][j]);
-
-    /* printf("S_2: %lf\n", s); */
-
   }
   s1 = s1 * (0.5 - 1);
   s = s + s1;
   return s;
 }
 
-/* double calculateFullPosterior(dataSet *ds, model *m, double **background, int *labels, int *startPos){ */
-/*   double s, s1; */
-/*   int i, j, k; */
-/*   motifStruct *m1; */
-/*   s = 0; */
-/*   s1 = 0; */
-/*   for(i = 0; i < m->mode; i++){ */
-/*     s = s + ((m->t)[i])*(log((m->t)[i] + m->alpha) - log(m->n + m->mode*m->alpha)); */
-/*     s = s - m->lambda*(m->mWidth)[i]; */
-/*     m1 = (m->motifs)[i].motif; */
-/*     for(j = 0; j < (m->mWidth)[i]; j++){ */
-/*       for(k = 0; k < m->featureValues; k++){ */
-/* 	s1 = s1 + log((m1->modeMotifCount)[k] + 0.5) - log((m->t)[i] + m->featureValues*0.5); */
-/*       } */
-/*       m1 = m1->next; */
-/*     } */
-
-/*     /\* printf("S_1: %lf\n", s); *\/ */
-/*   } */
-/*   for(i = 0; i < ds->n; i++){ */
-/*     if(startPos[i] == -1){ */
-/*       for(j = 0; j < (ds->features)[i]; j++) if(background[i][j] > 0.00001) s = s + log(background[i][j]); */
-/*       if(m->zoops > 0 && m->zoops < 1) s = s + log(m->zoops); */
-/*       else s = s - log((ds->features)[i]); */
-/*       continue; */
-/*     } */
-/*     if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log((ds->features)[i]); */
-/*     else s = s - log((ds->features)[i]); */
-/*     /\* printf("S_3: %lf\n", s); *\/ */
-/*     m1 = (m->motifs)[labels[i]].motif; */
-/*     for(j = 0; j < (m->mWidth)[labels[i]]; j++){ */
-/*       s = s + log((m1->modeMotifCount)[(ds->data)[i][j + startPos[i]]] + 0.5) - log((m->t)[labels[i]] + m->featureValues*0.5); */
-/*       m1 = m1->next; */
-/*     } */
-/*     for(j = 0; j < startPos[i]; j++) if(background[i][j] > 0.00001) s = s + log(background[i][j]); */
-/*     for(j = startPos[i] + (m->mWidth)[labels[i]]; j < (ds->features)[i]; j++) if(background[i][j] > 0.00001) s = s + log(background[i][j]); */
-
-/*     /\* printf("S_2: %lf\n", s); *\/ */
-
-/*   } */
-/*   s1 = s1 * (0.5 - 1); */
-/*   s = s + s1; */
-/*   return s; */
-/* } */
-
-double calculateLikelihood(model *m, dataSet *ds, int *lp, int *startPos, double **background, int **featureCounts, int minWidth){
+/* Calculate likelihood */
+double calculateLikelihood(model *m, dataSet *ds, int *lp, int *startPos, double **background, int **featureCounts){
   double s, s1, lxi;
   int i, j, k;
   motifStruct *m1;
@@ -314,21 +179,10 @@ double calculateLikelihood(model *m, dataSet *ds, int *lp, int *startPos, double
       if(m->zoops == 0) lxi = lxi - log(featureCounts[i][lp[i]]);
       else if(m->zoops == 1) lxi = lxi - log(featureCounts[i][lp[i]] + 1);
       else lxi = lxi + log(1 - m->zoops) - log(featureCounts[i][lp[i]]);
-      /* if(m->zoops == 0) lxi = lxi - log(featureCounts[i][(m->mWidth)[lp[i]] - minWidth]); */
-      /* else if(m->zoops == 1) lxi = lxi - log(featureCounts[i][(m->mWidth)[lp[i]] - minWidth] + 1); */
-      /* else lxi = lxi + log(1 - m->zoops) - log(featureCounts[i][(m->mWidth)[lp[i]] - minWidth]); */
       s = s + lxi;
     }
     else if(startPos[i] == -1 && m->zoops != 0) s = s + log(m->zoops);
     else if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log(featureCounts[i][lp[i]]);
-    /* else if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log(featureCounts[i][(m->mWidth)[lp[i]] - minWidth]); */
-
-    /* if(lxi != 0) s = s + log(lxi); */
-    /* if(m->zoops > 0 && m->zoops < 1){ */
-    /*   if(startPos[i] == -1) s = s + log(m->zoops); */
-    /*   else s = s + log(1 - m->zoops) - log((ds->features)[i]); */
-    /* } */
-    /* else s = s - log((ds->features)[i]); */
   }
   for(i = 0; i < m->mode; i++){
     m1 = (m->motifs)[i].motif;
@@ -344,12 +198,8 @@ double calculateLikelihood(model *m, dataSet *ds, int *lp, int *startPos, double
   return s;
 }
 
-/* double calculateLikelihoodFaster(model *m, dataSet *ds, int *lp, int *startPos, double **background, int oldLabel, int oldStart, int index, double likelihood){ */
-/*   int i; */
-/*   for(i =    */
-/* } */
-
-double calculateLikelihoodMode(model *m, dataSet *ds, int *labels, int *startPos, double **background, int **featureCounts, int mode, int minWidth){
+/* Calculate likelihood of all sequences belonging to the given mode */
+double calculateLikelihoodMode(model *m, dataSet *ds, int *labels, int *startPos, double **background, int **featureCounts, int mode){
   double s, s1;
   int i, j;
   motifStruct *mf;
@@ -364,22 +214,10 @@ double calculateLikelihoodMode(model *m, dataSet *ds, int *labels, int *startPos
       if(m->zoops == 0) s1 = s1 - log(featureCounts[i][mode]);
       else if(m->zoops == 1) s1 = s1 - log(featureCounts[i][mode] + 1);
       else s1 = s1 + log(1 - m->zoops) - log(featureCounts[i][mode]);
-      /* if(m->zoops == 0) s1 = s1 - log(featureCounts[i][(m->mWidth)[mode] - minWidth]); */
-      /* else if(m->zoops == 1) s1 = s1 - log(featureCounts[i][(m->mWidth)[mode] - minWidth] + 1); */
-      /* else s1 = s1 + log(1 - m->zoops) - log(featureCounts[i][(m->mWidth)[mode] - minWidth]); */
       s = s + s1;
     }
     else if(startPos[i] == -1 && m->zoops != 0) s = s + log(m->zoops);
     else if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log(featureCounts[i][mode]);
-    /* else if(m->zoops > 0 && m->zoops < 1) s = s + log(1 - m->zoops) - log(featureCounts[i][(m->mWidth)[mode] - minWidth]); */
-
-      
-    /* if(s1 != 0) s = s + log(s1); */
-    /* if(m->zoops > 0 && m->zoops < 1){ */
-    /*   if(startPos[i] == -1) s = s + log(m->zoops); */
-    /*   else s = s + log(1 - m->zoops) - log((ds->features)[i]); */
-    /* } */
-    /* else s = s - log((ds->features)[i]); */
   }
   mf = (m->motifs)[mode].motif;
   s1 = 0;
@@ -395,12 +233,12 @@ double calculateLikelihoodMode(model *m, dataSet *ds, int *labels, int *startPos
   return s;
 }
 
+/* Calculate likelihood of a single sequence */
 double likelihoodXi(model *m, dataSet *ds, int mode, int start, int index, double *background){
   int i;
-  double s, s1;
+  double s;
   motifStruct *m1;
   s = 1;
-  s1 = 1;
   if(start == -1) return 0;
   if((start + (m->mWidth)[mode]) > (ds->features)[index]) return 0;
   m1 = (m->motifs)[mode].motif;
@@ -416,12 +254,12 @@ double likelihoodXi(model *m, dataSet *ds, int mode, int start, int index, doubl
   return s;
 }
 
+/* Calculate likelihood of a single sequence faster */
 double likelihoodXiFaster(model *m, dataSet *ds, int mode, int start, int index, double *background){
   int i;
-  double s, s1;
+  double s;
   motifStruct *m1;
   s = 1;
-  s1 = 1;
   m1 = (m->motifs)[mode].motif;
   for(i = 0; i < (m->mWidth)[mode]; i++){
     s = s * ((m1->modeMotifCount)[(ds->data)[index][i + start]] + 0.5) / ((m->t)[mode] + m->featureValues*0.5);
@@ -432,7 +270,8 @@ double likelihoodXiFaster(model *m, dataSet *ds, int mode, int start, int index,
   return s;
 }
 
-int sampleNewLabel(model *m, dataSet *ds, int *startPos, int index, unsigned int *seed, int flag, double *background, int *featureCounts, int minWidth){
+/* Sample label for given sequence */
+int sampleNewLabel(model *m, dataSet *ds, int *startPos, int index, unsigned int *seed, int flag, double *background, int *featureCounts){
   double *values;
   int i, j;
   values = (double*)malloc(sizeof(double)*m->mode);
@@ -444,107 +283,17 @@ int sampleNewLabel(model *m, dataSet *ds, int *startPos, int index, unsigned int
       if(m->zoops == 0) values[i] = values[i] / featureCounts[i];
       else if(m->zoops == 1) values[i] = values[i] / (featureCounts[i] + 1);
       else values[i] = values[i] * (1 - m->zoops) / featureCounts[i];
-      /* if(m->zoops == 0) values[i] = values[i] / featureCounts[(m->mWidth)[i] - minWidth]; */
-      /* else if(m->zoops == 1) values[i] = values[i] / (featureCounts[(m->mWidth)[i] - minWidth] + 1); */
-      /* else values[i] = values[i] * (1 - m->zoops) / featureCounts[(m->mWidth)[i] - minWidth]; */
     }
   }
   if(flag == 1) j = arrayMax(values, m->mode);
   else{
     j = sample(values, m->mode, ((double)rand_r(seed))/(RAND_MAX));
-    //    j = sample(values, m->mode, ((double)rand())/(RAND_MAX));
-    //    j = sample(values, m->mode, erand48(seed));
   }
   free(values);
   return j;
 }
 
-/* int sampleStartPosFast(model *m, dataSet *ds, int mode, int index, int start, unsigned int *seed, int flag, double *background, int *indices){ */
-/*   double *values, sum, v, currProb; */
-/*   int i, j, count; */
-/*   double *values1; */
-/*   sum = 0; */
-/*   count = 0; */
-/*   values = (double*)malloc(sizeof(double)*((ds->features)[index])); */
-/*   if(!values) printMessages(0, NULL); */
-/*   values1 = (double*)malloc(sizeof(double)*((ds->features)[index])); */
-/*   if(!values1) printMessages(0, NULL); */
-/*   for(i = 0; i < (ds->features)[index]; i++){ */
-/*     values[i] = likelihoodXi(m, ds, mode, indices[i], index, background); */
-/*     if(values[i] == 0) count++; */
-/*     sum = sum + values[i]; */
-/*   } */
-
-/*   copyLabels(values, values1, (ds->features)[index]); */
-/*   for(i = 0; i < (ds->features)[index]; i++) values[i] = values[i]/sum; */
-
-
-/*   /\* printf("Values\n"); *\/ */
-/*   /\* for(i = 0; i < (ds->features)[index]; i++){ *\/ */
-/*   /\*   printf("%lf\t", values[i]); *\/ */
-/*   /\* } *\/ */
-/*   /\* printf("\n"); *\/ */
-/*   /\* printf("Indices\n"); *\/ */
-/*   /\* for(i = 0; i < (ds->features)[index]; i++){ *\/ */
-/*   /\*   printf("%d\t", indices[i]); *\/ */
-/*   /\* } *\/ */
-/*   /\* printf("\n"); *\/ */
-
-/*   if(count == (ds->features)[index]) j = -1; */
-
-
-/*   j = 0; */
-/*   v = ((double)rand())/(RAND_MAX); */
-/*   /\* printf("V: %lf, sum: %lf\n",v, sum); *\/ */
-/*   //  v = v * sum; */
-/*   currProb = values[0]; */
-/*   /\* printf("Starting prob: %lf\n", currProb); *\/ */
-/*   while(v > currProb){ */
-/*     j++; */
-/*     currProb = currProb + values[j]; */
-/*   } */
-
-
-/*   /\* j = sample(values1, (ds->features)[index], ((double)rand())/(RAND_MAX)); *\/ */
-
-/*   /\* printf("J: %d, start: %d, v: %lf\n", j, start, v); *\/ */
-/*   printf("Found in %d\n", j); */
-/*   if(j != start){  */
-/*     /\* bubbleSort(values, indices, (ds->features)[index]); *\/ */
-/*     bubble(values, indices, j, (ds->features)[index]); */
-/*     bubble(values, indices, start, (ds->features)[index]); */
-/*     /\* printf("Sorted indices: %d, %d, %d, %d\n", indices[0], indices[1], indices[2], indices[3]); *\/ */
-/*     /\* printf("Sorted Values: %lf, %lf, %lf, %lf\n", values[0], values[1], values[2], values[3]); *\/ */
-/*   } */
-/*   free(values); */
-/*   free(values1); */
-/*   return j; */
-/* } */
-
-int sampleStartPosFast(model *m, dataSet *ds, int mode, int index, int start, unsigned int *seed, int flag, double *background){
-  double *values, sum;
-  int i, j, count, *positions, size;
-  size = 5;
-  sum = 0;
-  values = (double*)malloc(sizeof(double)*size);
-  if(!values) printMessages(0, NULL);
-  positions = nRandomPos(size, (ds->features)[index], start, seed);
-  for(i = 0; i < size; i++){
-    values[i] = likelihoodXi(m, ds, mode, positions[size], index, background);
-    if(values[i] == 0) count++;
-    sum = sum + values[i];
-  }
-  if(count == (ds->features)[index]) j = -1;
-  else j = sample(values, size, ((double)rand())/(RAND_MAX));
-  if(j != -1) j = positions[j];
-  free(values);
-  free(positions);
-  /* printf("Index: %d, start: %d, Positions:\n", index, start); */
-  /* for(i = 0; i < 5; i++) printf("%d\t", positions[i]); */
-  /* printf("\n"); */
-  return j;
-}
-
+/* Sample start position of motif for given sequence */
 int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *seed, int flag, double *background){
   double *values, sum;
   int i, j, count;
@@ -563,11 +312,6 @@ int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *see
     sum = sum + values[i];
     i++;
   }
-  /* printf("Values:\n"); */
-  /* for(i = 0; i < (ds->features)[index]; i++) */
-  /*   printf("%lf\t", values[i]); */
-  /* printf("\n"); */
-
   if(sum < 0.00001){
     free(values);
     return -1;
@@ -581,8 +325,6 @@ int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *see
   if(count == (ds->features)[index]) j = -1;
   else if(flag == 1) j = arrayMax(values, (ds->features)[index]);
   else{
-    //    j = sample(values, (ds->features)[index] + (m->zoops > 0), erand48(seed));
-    //    j = sample(values, (ds->features)[index] + (m->zoops > 0), ((double)rand())/(RAND_MAX));
     j = sample(values, (ds->features)[index] + (m->zoops > 0), ((double)rand_r(seed))/(RAND_MAX));
   }
   free(values);
@@ -590,67 +332,24 @@ int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *see
   return j;
 }
 
+/* Compute the width increase/decrease of a given motif from the left */
 int sampleMotifWidthLeft(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, unsigned int *seed){
-  int i, j;
+  int i;
   double *values;
   values = (double*)malloc(sizeof(double)*3);
   if(!values) printMessages(0, NULL);
   values[0] = 1;
   values[1] = motifRemoveLeftScore(ds, m, background, labels, startPos, mode);
-  //  values[1] = 0;
   values[2] = motifAddLeftScore(ds, m, background, labels, startPos, mode);
-  /* if((m->mWidth)[mode] == m->minWidth) values[1] = 0; */
-  /* else values[1] = motifRemoveLeftScore(ds, m, background, labels, startPos, mode); */
-  /* //  printf("Value1: %lf\n", values[1]); */
-  /* if((m->mWidth)[mode] == m->maxWidth) values[2] = 0; */
-  /* else values[2] = motifAddLeftScore(ds, m, background, labels, startPos, mode); */
-  /* if(values[1] == values[2] && values[0] == values[1]) return 0; */
-  /* if(values[1] < 0.00001 && values[2] < 0.00001) return 0; */
   if((m->mWidth)[mode] == minWidth) values[1] = 0;
-  //  if((m->mWidth)[mode] == maxWidth) values[2] = 0;
-  /* printf("Checking in left:\n"); */
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-
-  //  printf("Value2: %lf\n", values[2]);
-  /* printf("Old width: %d\n", (m->mWidth)[mode]); */
-  /* printf("Old start: "); */
-  /* i = 0; */
-  /* j = 0; */
-  /* while(i < 5 && j < ds->n){ */
-  /*   if(labels[j++] != mode) continue; */
-  /*   printf("%d\t", startPos[j - 1]); */
-  /*   i++; */
-  /* } */
-  /* printf("\n"); */
-  /* printf("Values Left:\n"); */
-  /* for(i = 0; i < 3; i++) printf("%lf\t", values[i]); */
-  /* printf("\n"); */
   i = sample(values, 3, ((double)rand_r(seed))/(RAND_MAX));
-  //  i = sample(values, 3, ((double)rand())/(RAND_MAX));
-  //  i = sample(values, 3, erand48(seed));
   if(i == 1) motifLeftDecrease(ds, m, background, labels, startPos, mode);
   else if(i == 2) motifLeftIncrease(ds, m, background, labels, startPos, mode);
-
-  /* printf("Checking in left 2: %d\n", i); */
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-
-  /* printf("In Left 1\n"); */
-  /* printf("New Width: %d\n", (m->mWidth)[mode]); */
-  /* printf("New start: "); */
-  /* i = 0; */
-  /* j = 0; */
-  /* while(i < 5 && j < ds->n){ */
-  /*   if(labels[j++] != mode) continue; */
-  /*   printf("%d\t", startPos[j - 1]); */
-  /*   i++; */
-  /* } */
-  /* printf("\n"); */
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-  /* printf("In Left 2\n"); */
   free(values);
   return i;
 }
 
+/* Compute the width increase/decrease of a given motif from the right */
 int sampleMotifWidthRight(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, unsigned int *seed){
   int i;
   double *values;
@@ -660,52 +359,10 @@ int sampleMotifWidthRight(dataSet *ds, model *m, double **background, int *label
   values[1] = motifRemoveRightScore(ds, m, background, labels, startPos, mode);
   values[2] = motifAddRightScore(ds, m, background, labels, startPos, mode);  
   if((m->mWidth)[mode] == minWidth) values[1] = 0;
-  //  if((m->mWidth)[mode] == maxWidth) values[2] = 0;
-  /* if((m->mWidth)[mode] == m->minWidth) values[1] = 0; */
-  /* else values[1] = motifRemoveRightScore(ds, m, background, labels, startPos, mode); */
-  /* if((m->mWidth)[mode] == m->maxWidth) values[2] = 0; */
-  /* else values[2] = motifAddRightScore(ds, m, background, labels, startPos, mode);   */
-  /* if(values[1] == values[2] && values[0] == values[1]) return 0; */
-  /* if(values[1] < 0.00001 && values[2] < 0.00001) return 0; */
-
-  /* printf("Checking in right:\n"); */
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-
-
-  //  printf("Value1: %lf\n", values[1]);
-  //  printf("Value2: %lf\n", values[2]);
-  /* printf("Values Right: total: %d\n", (m->t)[mode]); */
-  /* for(i = 0; i < 3; i++) printf("%lf\t", values[i]); */
-  /* printf("\n"); */
   i = sample(values, 3, ((double)rand_r(seed))/(RAND_MAX));
-  //  i = sample(values, 3, erand48(seed));
-  //  i = sample(values, 3, ((double)rand())/(RAND_MAX));
   if(i == 2) motifRightIncrease(ds, m, background, labels, startPos, mode);
   else if(i == 1) motifRightDecrease(ds, m, background, labels, startPos, mode);
-
-  /* printf("Checking in right 2: %d\n", i); */
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-
   free(values);
-  /* if(i == 1) printf("INCREASED\n\n"); */
-  /* else if(i == 2) printf("DECREASED\n\n"); */
-  return i;
-}
-
-int shiftMotif(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, unsigned int *seed){
-  int i;
-  double *values;
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
-  values = (double*)malloc(sizeof(double)*3);
-  if(!values) printMessages(0, NULL);
-  values[0] = 1;
-  values[1] = motifShiftLeftScore(ds, m, background, labels, startPos, mode);
-  values[2] = motifShiftRightScore(ds, m, background, labels, startPos, mode);
-  i = sample(values, 2, ((double)rand())/(RAND_MAX));
-  if(i == 1) motifShiftLeft(ds, m, background, labels, startPos, mode);
-  else if(i = 2) motifShiftRight(ds, m, background, labels, startPos, mode);
-  free(values);
-  /* checkMotifCount(ds, m, labels, startPos, mode, (m->mWidth)[mode]); */
   return i;
 }
 
@@ -732,44 +389,45 @@ double EMLike(model *m, dataSet *ds, int *labels, int *startPos, double **backgr
   return maxLikelihood;
 }
 
+/* model training */
 trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename){
-  double maxLikelihood, tmpLikelihood, *modeLikes, tl;
-  int i, j, j1, k, oldLabel, oldStart, flag, count, iterLike;
-  FILE *fp1, *fp3, *fp4, *fp5;
+  double maxLikelihood, tmpLikelihood, *modeLikes;
+  int i, j, j1, k, oldLabel, oldStart, flag, count;
   int *lpc, *spc;
-  int **istart;
-  int *oldlabels;
   motifStruct *m1;
   int *widths;
   int **labelcounts;
-  double c0, c1, cov00, cov01, cov11, chisq, *x;
+  double c1, *x;
   int oldChangeIndex, motifWidthChange;
   int front, rear, qSize, movingCounter, movingOffset, isFull;
   double qSum, xsum, xxsum, xysum;
   queueStruct *queue;
   trainOut *to;
   int *labels, *startPos;
-  int **featureCounts;
+  int **featureCounts, **featureCountsCopy;
   model *m;
+  FILE *fp3, *fp2;
 
+  int i1, j2, k1;
+  
+  /* Initializations */
   featureCounts = getFeatureCounts(ds, mode, mWidth[0]);
+  featureCountsCopy = (int**)malloc(sizeof(int*)*ds->n);
+  if(!featureCountsCopy) printMessages(0, NULL);
+  for(i = 0; i < ds->n; i++)
+    {
+      featureCountsCopy[i] = (int*)malloc(sizeof(int)*mode);
+      if(!featureCountsCopy[i]) printMessages(0, NULL);
+      for(j = 0; j < mode; j++) featureCountsCopy[i][j] = featureCounts[i][j];
+      
+    }
+  
   to = (trainOut*)malloc(sizeof(trainOut));
   if(!to) printMessages(0, NULL);
   labels = (int*)malloc(sizeof(int)*ds->n);
   if(!labels) printMessages(0, NULL);
   startPos = (int*)malloc(sizeof(int)*ds->n);
   if(!startPos) printMessages(0, NULL);
-
-  /* featureCounts = getFeatureCounts(ds, 8, 15); */
-  /* for(i = 0; i < ds->n; i++){ */
-  /*   for(j = 0; j < 15 - 8 + 1; j++){ */
-  /*     printf("%d\t", featureCounts[i][j]); */
-  /*   } */
-  /*   printf("\n"); */
-  /* } */
-  /* printf("Length: %d\n", (ds->features)[0]); */
-  /* exit(0); */
-
 
   initializeLabelStartPos(ds, labels, startPos, mode, mWidth, &seed);
   m = createModel(mode, ds, labels, startPos, alpha, lambda, zoops, mWidth);
@@ -793,23 +451,17 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
   x = (double*)malloc(sizeof(double)*qSize);
   for(i = 0; i < qSize; i++) x[i] = i + 1;
   
-
+  /* fp2 = fopen("likecalc.txt", "w"); */
+  
 
   fp = NULL;
   if(filename[0] != '0') fp = fopen(filename, "w");
-
-  /* fp3 = fopen("EMLIKE.txt", "w"); */
-  /* fp4 = fopen("movingAvg.txt", "w"); */
-  /* fp5 = fopen("slopeC.txt", "w"); */
-
   lpc = (int*)malloc(sizeof(int)*ds->n);
   if(!lpc) printMessages(0, NULL);
   spc = (int*)malloc(sizeof(int)*ds->n);
   if(!spc) printMessages(0, NULL);
   widths = (int*)malloc(sizeof(int)*m->mode);
   if(!widths) printMessages(0, NULL);
-  oldlabels = (int*)malloc(sizeof(int)*ds->n);
-  if(!oldlabels) printMessages(0, NULL);
 
   labelcounts = (int**)malloc(sizeof(int*)*ds->n);
   if(!labelcounts) printMessages(0, NULL);
@@ -821,127 +473,131 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
   }
 
   copyLabels(labels, lpc, ds->n);
-  copyLabels(labels, oldlabels, ds->n);
   copyLabels(startPos, spc, ds->n);
   copyLabels(m->mWidth, widths, m->mode);
 
   modeLikes = (double*)malloc(sizeof(double)*m->mode);
   if(!modeLikes) printMessages(0, NULL);
 
-  for(i = 0; i < m->mode; i++) modeLikes[i] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, i, minWidth);
+  for(i = 0; i < m->mode; i++) modeLikes[i] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, i);
   j = 0;
   i = 0;
-  maxLikelihood = calculateLikelihood(m, ds, lpc, spc, background, featureCounts, minWidth);
+  maxLikelihood = calculateLikelihood(m, ds, lpc, spc, background, featureCounts);
 
-  //  printf("Likelihood: %lf\n", maxLikelihood);
   tmpLikelihood = maxLikelihood;
 
   enqueue(queue, &front, &rear, &isFull, qSize, tmpLikelihood, &qSum, &xysum);
 
   count = 0;
   flag = 0;
-  iterLike = 0;
 
-
-  //  while(j < 5*ds->n){
+  /* Iterate over the entire dataset n times where n is the size of the data set */
   while(j < ds->n){
-  //while(j < 10){
-    //    printf("%d\n", j);
+    /* Iterate over all sequences of data set */
     for(i = 0; i < ds->n; i++){
-      //      printf("i: %d\n", i);
       oldLabel = lpc[i];
       oldStart = spc[i];
       addRemoveDataPoint(m, ds, lpc, spc, i, -1);
-      
+
+      /* Sample label and motif start posiiton for given sequence */
       if(lpc[i] != -1) spc[i] = sampleStartPos(m, ds, lpc[i], i, &seed, 0, background[i]);
       if(spc[i] != -1){
-      	/* if((m->t)[lpc[i]] > 20) */ lpc[i] = sampleNewLabel(m, ds, spc, i, &seed, 0, background[i], featureCounts[i], minWidth);
+      	lpc[i] = sampleNewLabel(m, ds, spc, i, &seed, 0, background[i], featureCounts[i]);
 	labelcounts[i][lpc[i]]++;
       }
 
       addRemoveDataPoint(m, ds, lpc, spc, i, 1);
 
       if(oldLabel == lpc[i] && oldStart == spc[i]){
-	/////////////////////// QUEUE OPS /////////////////////
+
+	/* Check of all  likelihood values lie in a straight line to see if it has converged */
 	enqueue(queue, &front, &rear, &isFull, qSize, tmpLikelihood, &qSum, &xysum);
 	movingCounter = (movingCounter + 1)%(movingOffset + 1);
 	if(movingCounter == movingOffset && isFull == qSize){
 	  movingCounter = 0;
-	  /* fprintf(fp4, "%lf\n", qSum/qSize); */
-	  //	  gsl_fit_linear(x, 1, queue, 1, qSize, &c0, &c1, &cov00, &cov01, &cov11, &chisq);
-	  //	  printf("GSL: %lf, calculated: %lf\n", c1, linearSlope(queue, qSize));
 	  c1 = linearSlope(queue, xsum, qSum, xxsum, xysum, qSize);
 	  if((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001)){
 	    flag = 1;
 	  }
-	  /* fprintf(fp5, "%lf\n", c1); */
 	}
-
-      ///////////////////////////////////////////////////////
 	continue;
       }
 
-      modeLikes[oldLabel] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, oldLabel, minWidth);
-      if(oldLabel != lpc[i]) modeLikes[lpc[i]] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, lpc[i], minWidth);
+      modeLikes[oldLabel] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, oldLabel);
+      if(oldLabel != lpc[i]) modeLikes[lpc[i]] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, lpc[i]);
       tmpLikelihood = 0;
       for(k = 0; k < m->mode; k++) tmpLikelihood = tmpLikelihood + modeLikes[k];
       if(fp != NULL) fprintf(fp, "%lf\n", tmpLikelihood);
-      //      fprintf(fp3, "%lf\n", EMLike(m, ds, lpc, spc, background));
-
-      /////////////////////// QUEUE OPS /////////////////////
-      
+      /* fprintf(fp2, "%lf\n", calculateLikelihood(m, ds, lpc, spc, background, featureCounts)); */
+      /* Check of all  likelihood values lie in a straight line to see if it has converged */
       enqueue(queue, &front, &rear, &isFull, qSize, tmpLikelihood, &qSum, &xysum);
       movingCounter = (movingCounter + 1)%(movingOffset + 1);
       if(movingCounter == movingOffset && isFull == qSize){
 	movingCounter = 0;
-	//	fprintf(fp4, "%lf\n", qSum/qSize);
-	/* gsl_fit_linear(x, 1, queue, 1, qSize, &c0, &c1, &cov00, &cov01, &cov11, &chisq); */
 	c1 = linearSlope(queue, xsum, qSum, xxsum, xysum, qSize);
 	if((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001)){
 	  flag = 1;
 	}
-	//	fprintf(fp5, "%lf\n", c1);
       }
 
-      ///////////////////////////////////////////////////////
-
+      /* Update best model if the current likelihood is the maximum likelihood */
       if(tmpLikelihood > maxLikelihood){
+	/* printf("max: %lf, calc: %lf\n", tmpLikelihood, calculateLikelihood(m, ds, lpc, spc, background, featureCounts)); */
+	
 	copyLabels(lpc, labels, ds->n);
 	copyLabels(spc, startPos, ds->n);
 	copyLabels(m->mWidth, widths, m->mode);
+
+	for(i1 = 0; i1 < ds->n; i1++)
+	  for(k1 = 0; k1 < mode; k1++)
+	    featureCountsCopy[i1][k1] = featureCounts[i1][k1];
+	
 	maxLikelihood = tmpLikelihood;
-	iterLike = j;
-      }
+
+	  /* fp3 = fopen("learnedlabels.txt", "w"); */
+	  /* for(k = 0; k < ds->n; k++) fprintf(fp3, "%d\n", labels[k]); */
+	  /* fclose(fp3); */
+
+	  /* fp3 = fopen("learnedstart.txt", "w"); */
+	  /* for(k = 0; k < ds->n; k++) fprintf(fp3, "%d\n", startPos[k]); */
+	  /* fclose(fp3); */
+
+	  /* fp3 = fopen("learnedwidth.txt", "w"); */
+	  /* for(k = 0; k < m->mode; k++) fprintf(fp3, "%d\n", widths[k]); */
+	  /* fclose(fp3); */
+
+	  /* printf("feature count:\n"); */
+	  /* for(i1 = 0; i1 < m->mode; i1++) */
+	  /*   { */
+	  /*     m1 = (m->motifs)[i1].motif; */
+	  /*     for(j2 = 0; j2 < (m->mWidth)[i1]; j2++) */
+	  /* 	{ */
+	  /* 	  printf("%d\t", (m1->modeMotifCount)[1]); */
+	  /* 	  m1 = m1->next; */
+	  /* 	} */
+	  /*     printf("\n"); */
+	  /*   } */
+	  
+      }	
     }
 
 
     j++;
     count++;
-    /* if(j > 200){ */
-    /*   printf("Average: %lf\n", avgCorrCoef(m, ds, lpc, spc, background, labelcounts)); */
-    /*   if(avgCorrCoef(m, ds, lpc, spc, background, labelcounts) > 0.9) break; */
-    /* } */
-    //    if(j > 0) continue;
-
     if(j%(ds->n/10) != 0) continue;
-    /* //    if(flag == 0) continue; */
-    /* flag = 0; */
 
-    ////////////////////////////////////////////////////////////////////
+    /* Update motif size after every n/10 iteration. So, the motif size would be changed at most 10 times while training */
     if(j < ds->n/10){
       oldChangeIndex = -1;
       motifWidthChange = 0;
     }
+      /* Check of all  likelihood values lie in a straight line to see if it has converged */
     if(oldChangeIndex > 0 && motifWidthChange >= 2 && ((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001))) break;
-    /////////////////////////////////////////////////////////////////////
 
-    /* /\* else if(j <= 100){ *\/ */
-    /* /\*   oldChangeIndex = -1; *\/ */
-    /* /\*   motifWidthChange = 0; *\/ */
-    /* /\* } *\/ */
-    //    if(j%20 != 0) continue;
     oldChangeIndex = j;
     count = 0;
+
+    /* Update motif size for every mode */
     for(i = 0; i < m->mode; i++){
       while(1){
 	flag = 0;
@@ -959,10 +615,9 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
 	  motifWidthChange++;
 	  break;
 	}
-	//	printf("Sampling for mode %d, width: %d, flag: %d\n", i, (m->mWidth)[i], flag);
 	motifWidthChange = 0;
 	modeFeatureCount(ds, featureCounts, (m->mWidth)[i], i);
-	tmpLikelihood = calculateLikelihood(m, ds, lpc, spc, background, featureCounts, minWidth);
+	tmpLikelihood = calculateLikelihood(m, ds, lpc, spc, background, featureCounts);
 	
 	enqueue(queue, &front, &rear, &isFull, qSize, tmpLikelihood, &qSum, &xysum);
 	movingCounter = (movingCounter + 1)%(movingOffset + 1);
@@ -970,67 +625,116 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
 	  movingCounter = 0;
 	  c1 = linearSlope(queue, xsum, qSum, xxsum, xysum, qSize);
 	}
-	modeLikes[i] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, i, minWidth);
+	modeLikes[i] = calculateLikelihoodMode(m, ds, lpc, spc, background, featureCounts, i);
 	if(fp != NULL) fprintf(fp, "%lf\n", tmpLikelihood);
+	/* fprintf(fp2, "%lf\n", calculateLikelihood(m, ds, lpc, spc, background, featureCounts)); */
+
+	/* Update best model if the current likelihood is the maximum likelihood */
 	if(tmpLikelihood > maxLikelihood){
+	  /* printf("max: %lf, calc: %lf\n", tmpLikelihood, calculateLikelihood(m, ds, lpc, spc, background, featureCounts)); */
 	  maxLikelihood = tmpLikelihood;
-	  iterLike = j;
 	  copyLabels(lpc, labels, ds->n);
 	  copyLabels(spc, startPos, ds->n);
 	  copyLabels(m->mWidth, widths, m->mode);
-	}
-	//	printf("flag: %d, motif width: %d\n", flag, (m->mWidth)[i]);
+
+	  for(i1 = 0; i1 < ds->n; i1++)
+	    for(k1 = 0; k1 < mode; k1++)
+	      featureCountsCopy[i1][k1] = featureCounts[i1][k1];
+	  
+	  /* fp3 = fopen("learnedlabels.txt", "w"); */
+	  /* for(k = 0; k < ds->n; k++) fprintf(fp3, "%d\n", labels[k]); */
+	  /* fclose(fp3); */
+
+	  /* fp3 = fopen("learnedstart.txt", "w"); */
+	  /* for(k = 0; k < ds->n; k++) fprintf(fp3, "%d\n", startPos[k]); */
+	  /* fclose(fp3); */
+
+	  /* fp3 = fopen("learnedwidth.txt", "w"); */
+	  /* for(k = 0; k < m->mode; k++) fprintf(fp3, "%d\n", widths[k]); */
+	  /* fclose(fp3); */
+
+	  /* printf("motif count:\n"); */
+	  /* for(i1 = 0; i1 < m->mode; i1++) */
+	  /*   { */
+	  /*     m1 = (m->motifs)[i1].motif; */
+	  /*     for(j2 = 0; j2 < (m->mWidth)[i1]; j2++) */
+	  /* 	{ */
+	  /* 	  printf("%d\t", (m1->modeMotifCount)[1]); */
+	  /* 	  m1 = m1->next; */
+	  /* 	} */
+	  /*     printf("\n"); */
+	  /*   } */
+	  
+	}		
 	if(flag == 0) break;
       }
     }
   }
+
   copyLabels(widths, m->mWidth, m->mode);
   freeMotifs(m->motifs, m->mode);
   m->motifs = initializeMotifs(m->mWidth, m->mode);
   getMotifCount(m, ds, startPos, labels);
 
-  /* printf("Maximum likelihood: %lf\n", maxLikelihood); */
-  /* printf("Iteration: %d\n", iterLike); */
-  /* printf("Full posterior: %lf\n", calculateFullPosterior(ds, m, background, labels, startPos)); */
+  for(i1 = 0; i1 < ds->n; i1++)
+    for(k1 = 0; k1 < mode; k1++)
+      featureCounts[i1][k1] = featureCountsCopy[i1][k1];
 
-  /* printf("Average: %lf\n", avgCorrCoef(m, ds, labels, startPos, background, labelcounts)); */
+  
+  /* printf("Final motif count:\n"); */
+  /* for(i1 = 0; i1 < m->mode; i1++) */
+  /*   { */
+  /*     m1 = (m->motifs)[i1].motif; */
+  /*     for(j1 = 0; j1 < (m->mWidth)[i1]; j1++) */
+  /* 	{ */
+  /* 	  printf("%d\t", (m1->modeMotifCount)[1]); */
+  /* 	  m1 = m1->next; */
+  /* 	} */
+  /*     printf("\n"); */
+  /*   } */
+  
+  
+  //////////////////////////////////////////////
+  /* printf("OUTSIDE: %lf\n", maxLikelihood); */
+  /* printf("Calculated: %lf\n", calculateLikelihood(m, ds, labels, startPos, background, featureCounts)); */
+  
+  /* fp3 = fopen("labels.txt", "w"); */
+  /* for(i = 0; i < ds->n; i++) fprintf(fp3, "%d\n", labels[i]); */
+  /* fclose(fp3); */
 
+  /* fp3 = fopen("start.txt", "w"); */
+  /* for(i = 0; i < ds->n; i++) fprintf(fp3, "%d\n", startPos[i]); */
+  /* fclose(fp3); */
 
-  //  maxLikelihood = calculateFullPosterior(ds, m, background, labels, startPos, featureCounts);
-  //  maxLikelihood = EMLike(m, ds, labels, startPos, background);
+  /* fp3 = fopen("width.txt", "w"); */
+  /* for(i = 0; i < m->mode; i++) fprintf(fp3, "%d\n", widths[i]); */
+  /* fclose(fp3); */
+
+  /////////////////////////////////////////////
+
+  
+
   j1 = 0;
+
+  /* Update model by maximizing posterior parameters */
 
   while(updateBestModel(ds, m, background, labels, startPos, j1) && j1 < 1000){
     getMotifCount(m, ds, startPos, labels);
-    maxLikelihood = calculateLikelihood(m, ds, labels, startPos, background, featureCounts, minWidth);
+    maxLikelihood = calculateLikelihood(m, ds, labels, startPos, background, featureCounts);
     if(fp != NULL) fprintf(fp, "%lf\n", maxLikelihood);
-    //    maxLikelihood = calculateFullPosterior(ds, m, background, labels, startPos, featureCounts);
+    /* fprintf(fp2, "%lf\n", calculateLikelihood(m, ds, lpc, spc, background, featureCounts)); */
+
     j1++;
   }
 
+  /* fclose(fp2); */
+  
   if(fp != NULL) fclose(fp);
-  /* fclose(fp3); */
-  /* fclose(fp4); */
-  /* fclose(fp5); */
-
-  /* printf("Widths:\n"); */
-  /* for(i = 0; i < m->mode; i++) printf("%d\t", (m->mWidth)[i]); */
-  /* printf("\n"); */
-
   copyLabels(m->mWidth, widths, m->mode);
 
-  /* printf("Last likelihood: %lf\n", tmpLikelihood); */
-
-  /* printf("Size:\n"); */
-  /* for(i = 0; i < m->mode; i++) */
-  /*   printf("%d\t", (m->t)[i]); */
-  /* printf("\n"); */
-
   double s;
-  //  printf("Entropy:\n");
   for(i = 0; i < m->mode; i++){
     if((m->t)[i] == 0) continue;
-    //    printf("Mode %d:\t", i);
     m1 = (m->motifs)[i].motif;
     s = 0;
     for(j = 0; j < (m->mWidth)[i]; j++){
@@ -1040,21 +744,22 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
       }
       m1 = m1->next;
     }
-    //    printf("%lf\n", s);
   }
+
+  /* Save values in trainOut structure and free the rest */
   for(i = 0; i < ds->n; i++) free(featureCounts[i]);
   free(featureCounts);
+  for(i = 0; i < ds->n; i++) free(featureCountsCopy[i]);
+  free(featureCountsCopy);
+
   for(i = 0; i < ds->n; i++) free(labelcounts[i]);
   free(lpc);
   free(spc);
   free(queue);
   free(x);
-  free(oldlabels);
   free(labelcounts);
   free(modeLikes);
   freeModel(m);
-  //  printf("Maximum likelihood: %lf\n", maxLikelihood);
-
   to->labels = labels;
   to->startPos = startPos;
   to->motifWidth = widths;

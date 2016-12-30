@@ -4,6 +4,7 @@
 #include "linkedListOps.h"
 #include "messages.h"
 
+/* Creates a node to store counts at a position in the given motif. Counts stored in the form of a linked list */
 motifStruct* createNode(){
   motifStruct *m = (motifStruct*)malloc(sizeof(motifStruct));
   if(!m) printMessages(0, NULL);
@@ -13,6 +14,7 @@ motifStruct* createNode(){
   return m;
 }
 
+/* Free a node of the linked list */
 void freeNode(motifStruct *m){
   free(m->modeMotifCount);
   m->next = NULL;
@@ -20,6 +22,7 @@ void freeNode(motifStruct *m){
   free(m);
 }
 
+/* Free the entire linked list storing count information of a given motif */
 void freeMotif(motifStruct *m){
   motifStruct *mc;
   while(m != NULL){
@@ -29,6 +32,7 @@ void freeMotif(motifStruct *m){
   }
 }
 
+/* Free all motifs that are stored in the form of a linked list */
 void freeMotifs(motifContainer *m, int n){
   int i;
   for(i = 0; i < n; i++){
@@ -38,6 +42,7 @@ void freeMotifs(motifContainer *m, int n){
   free(m);
 }
 
+/* Initialize a motif structure of given size */
 motifStruct* initializeMotif(int size){
   int i;
   motifStruct *m, *mc;
@@ -50,6 +55,7 @@ motifStruct* initializeMotif(int size){
   return m;
 }
 
+/* Initialize al motifs for a given model */
 motifContainer* initializeMotifs(int *widths, int n){
   motifContainer *mc;
   int i;
@@ -60,11 +66,13 @@ motifContainer* initializeMotifs(int *widths, int n){
   return mc;
 }
 
+/* Add a node to the front. Meaning motif width increased by one on the left */
 motifStruct* addNodeFront(motifStruct *f, motifStruct *m){
   f->next = m;
   return f;
 }
 
+/* Add a node to the end. Meaning motif width increased by one on the right */
 motifStruct* addNodeEnd(motifStruct *e, motifStruct *m){
   motifStruct *mc;
   mc = m;
@@ -73,6 +81,7 @@ motifStruct* addNodeEnd(motifStruct *e, motifStruct *m){
   return m;
 }
 
+/* Delete a node from the front. Meaning motif width decreased by one on the left */
 motifStruct* delNodeFront(motifStruct *m){
   motifStruct *mc;
   mc = m->next;
@@ -80,6 +89,7 @@ motifStruct* delNodeFront(motifStruct *m){
   return mc;
 }
 
+/* Delete a node from the end. Meaning motif width decreased by one on the right */
 motifStruct* delNodeEnd(motifStruct *m){
   motifStruct *mc, *mc1;
   mc = m;
@@ -90,15 +100,12 @@ motifStruct* delNodeEnd(motifStruct *m){
   return(m);
 }
 
+/* Get pointer to the last node of the motif */
 motifStruct* getLastNode(motifStruct *m){
   motifStruct *mc;
   mc = m;
-  //  printf("here!!\n");
   while(mc->next != NULL){
-    //    printf("HERE000\n");
     mc = mc->next;
   }
-  //  printf("here1!!\n");
-  //  printf("Last node 0 count: %d\n", (mc->modeMotifCount)[0]);
   return mc;
 }

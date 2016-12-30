@@ -24,9 +24,6 @@ def chooseBestModel(dirname, lmbda):
 
 d = (sys.argv)[1]
 
-v = chooseBestModel(d, 3)
-print "\nBest Model:", v
-
 v = chooseBestModel(d, 5)
 print "\nBest Model:", v
 

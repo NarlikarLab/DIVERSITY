@@ -6,6 +6,7 @@
 #include "modelops.h"
 #include "messages.h"
 
+/* Read FASTA file into a structure */
 dataSet* getData(char *s, char *outFile, int rev, int mask){
   int *features, n, tmpfeatures;
   FILE *dataFile, *fo;
@@ -45,12 +46,6 @@ dataSet* getData(char *s, char *outFile, int rev, int mask){
 	features[i] = tmpfeatures;
 	i++;
       }
-      /* if(ot == 0 && tmpfeatures > 0){ */
-      /* 	ot = 1; */
-      /* 	features = tmpfeatures; */
-      /* } */
-      /* else if(ot == 1)  */
-      /* 	if(features != tmpfeatures) printMessages(2, s); */
       flag = 1;
       tmpfeatures = 0;
     }
@@ -84,12 +79,6 @@ dataSet* getData(char *s, char *outFile, int rev, int mask){
   if(rev == 1)
     for(i = 0; i < n; i++)
       features[i] = 2 * features[i] + 1;
-
-  /* if(ot == 1){ */
-  /*   if(features != tmpfeatures) printMessages(2, s); */
-  /* } */
-  /* else */
-  /*   features = tmpfeatures; */
   rewind(dataFile);
   ds = (dataSet*)malloc(sizeof(dataSet));
   if(!(ds)) printMessages(0, NULL);
@@ -179,7 +168,8 @@ dataSet* getData(char *s, char *outFile, int rev, int mask){
   return ds;
 }
 
-double** getBackground1(dataSet *ds, int order){
+/* Compute background  */
+double** getBackground(dataSet *ds, int order){
   double **back, **counts, lsum;
   int i, j, k, l, ind, start;
   back = (double**)malloc(sizeof(double*)*ds->n);
@@ -235,6 +225,7 @@ double** getBackground1(dataSet *ds, int order){
   return back;
 }
 
+/* Compute maximum. Return 0 if start position is negative */
 int maxWithoutN(int *data, int pos, int order){
   int i, start;
   start = pos - order;
@@ -245,6 +236,7 @@ int maxWithoutN(int *data, int pos, int order){
   return start;
 }
 
+/* Compute index in the given sequence array */
 int getIndex(int *sequence, int start, int end, int order){
   int i, index;
   index = 0;
@@ -255,6 +247,7 @@ int getIndex(int *sequence, int start, int end, int order){
   return index;
 }
 
+/* Free structure dataSet */
 void freeData(dataSet *ds){
   int i;
   for(i = 0; i < ds->n; i++){
@@ -266,6 +259,7 @@ void freeData(dataSet *ds){
   free(ds); ds = NULL;
 }
 
+/* Create model structure */
 model* createModel(int mode, dataSet *ds, int *labels, int *startPos, float alpha, float lambda, double zoops, int *mWidth){
   int i;
   model *m = initializeModel(mode, ds->featureValues, mWidth);
@@ -275,46 +269,25 @@ model* createModel(int mode, dataSet *ds, int *labels, int *startPos, float alph
   m->alpha = alpha;
   m->zoops = zoops;
   m->lambda = lambda;
-  /* m->minWidth = minWidth; */
-  /* m->maxWidth = maxWidth; */
   for(i = 0; i < mode; i++) (m->mWidth)[i] = mWidth[i];
   getMotifCount(m, ds, startPos, labels);
   return m;
 }
 
+/* Initialize model structure */
 model *initializeModel(int mode, int featureValues, int *mWidth){
   model *m;
   m = (model*)malloc(sizeof(model));
   if(!m) printMessages(0, NULL);
-  /* m->modeMotifCount = (int***)malloc(sizeof(int**)*mode); */
-  /* if(!m->modeMotifCount) printMessages(0, NULL); */
   m->motifs = initializeMotifs(mWidth, mode);
-  /* printf("Motif:\n"); */
-  /* i = 0; */
-  /* m1 = (m->motifs)[i].motif; */
-  /* while(m1 != NULL){ */
-  /*   i++; */
-  /*   m1 = m1->next; */
-  /* } */
-  /* printf("Inside count: %d\n", i); */
-
-
   m->t = (int*)malloc(sizeof(int)*mode);
   if(!m->t) printMessages(0, NULL);
   m->mWidth = (int*)malloc(sizeof(int)*mode);
   if(!m->mWidth) printMessages(0, NULL);
-  /* for(i = 0; i < mode; i++){ */
-  /*   (m->modeMotifCount)[i] = (int**)malloc(sizeof(int*)*mWidth[i]); */
-  /*   if(!(m->modeMotifCount)[i]) printMessages(0, NULL); */
-  /*   for(j = 0; j < mWidth[i]; j++){ */
-  /*     (m->modeMotifCount)[i][j] = (int*)malloc(sizeof(int)*featureValues); */
-  /*     if(!(m->modeMotifCount)[i][j]) printMessages(0, NULL); */
-  /*     for(k = 0; k < featureValues; k++) (m->modeMotifCount)[i][j][k] = 0; */
-  /*   } */
-  /* } */
   return m;
 }
 
+/* Free model structure */
 void freeModel(model *m){
   freeMotifs(m->motifs, m->mode);
   free(m->t);
@@ -324,37 +297,10 @@ void freeModel(model *m){
   free(m);
 }
 
+/* Compute motif counts based on the start position of the motifs and the motif widths */
 void getMotifCount(model *m, dataSet *ds, int *startPos, int *labels){
   int i, j, k, mode;
   motifStruct *m1;
-
-  /* for(i = 0; i < m->mode; i++){ */
-  /*   for(j = 0; j < (m->mWidth)[i]; j++){ */
-  /*     for(k = 0; k < ds->featureValues; k++) */
-  /* 	(m->modeMotifCount)[i][j][k] = 0; */
-  /*   } */
-  /*   (m->t)[i] = 0; */
-  /* } */
-  /* m->n = 0; */
-  /* for(i = 0; i < ds->n; i++){ */
-  /*   mode = labels[i]; */
-  /*   if(startPos[i] == -1) continue; */
-  /*   (m->t)[mode]++; */
-  /*   m->n++; */
-
-  /*   for(j = startPos[i]; j < startPos[i] + (m->mWidth)[mode]; j++){ */
-  /*     (m->modeMotifCount)[mode][j - startPos[i]][(ds->data)[i][j]]++; */
-  /*   } */
-  /* } */
-
-  /* i = 0; */
-  /* m1 = (m->motifs)[0].motif; */
-  /* while(m1 != NULL){ */
-  /*   i++; */
-  /*   m1 = m1->next; */
-  /* } */
-  /* printf("Length: %d\n", i); */
-
   for(i = 0; i < m->mode; i++){
     m1 = (m->motifs)[i].motif;
     for(j = 0; j < (m->mWidth)[i]; j++){
@@ -377,31 +323,30 @@ void getMotifCount(model *m, dataSet *ds, int *startPos, int *labels){
       m1 = m1->next;
     }
   }
-
-
 }
 
+/* Sample values for labels array */
 int* sampleArrayVals(int n, int mode, int addVal, unsigned int *seed){
   int i, *lp;
   lp = (int*)malloc(sizeof(int)*n);
   if(!lp) printMessages(0, NULL);
   for(i = 0; i < n; i++) lp[i] = (rand()%mode)+addVal;
-  //  for(i = 0; i < n; i++) lp[i] = (rand_r(seed)%mode)+addVal;
   return lp;
 }
 
+/* Sample start positions */
 int* sampleStart(int n, int vals, int zoops, int notPresent, unsigned int *seed){
   int i, *lp;
   lp = (int*)malloc(sizeof(int)*n);
   if(!lp) printMessages(0, NULL);
   for(i = 0; i < n; i++){
     lp[i] = (rand()%(vals + zoops));
-    //    lp[i] = (rand_r(seed)%(vals + zoops));
     if(lp[i] == vals) lp[i] = notPresent;
   }
   return lp;
 }
-  
+
+/* Compute exp from given log values */
 void logToExp(double *p, int n){
   double max;
   int i;
@@ -412,6 +357,7 @@ void logToExp(double *p, int n){
     p[i] = pow(exp(1), p[i] - max);
 }
 
+/* Sample a value based on given ditribution */
 int sample(double *p, int n, double r){
   int low, high, mid, i;
   double sum;
@@ -440,6 +386,7 @@ int sample(double *p, int n, double r){
   return low;
 }
 
+/* Bubble sort */
 void bubbleSort(double *values, int *indices, int n){
   int i, j, temp;
   double tempV;
@@ -457,39 +404,8 @@ void bubbleSort(double *values, int *indices, int n){
   }
 }
 
-void bubble(double *values, int *indices, int pos, int n){
-  int i, j, temp, flag;
-  double tempV;
 
-  flag = 0;
-  while(pos > 0 && values[pos] > values[pos - 1]){
-    tempV = values[pos];
-    temp = indices[pos];
-    values[pos] = values[pos - 1];
-    indices[pos] = indices[pos - 1];
-    values[pos - 1] = tempV;
-    indices[pos - 1] = temp;
-    pos--;
-    flag = 1;
-    printf("Sorted 1\n");
-  }
-
-  if(flag == 0)
-    while(pos < (n - 1) && values[pos] < values[pos + 1]){
-      tempV = values[pos];
-      temp = indices[pos];
-      values[pos] = values[pos + 1];
-      indices[pos] = indices[pos + 1];
-      values[pos + 1] = tempV;
-      indices[pos + 1] = temp;
-      pos++;
-      printf("Sorted 2\n");
-    }
-
-  /* printf("DONE!!\n"); */
-  /* printf("Values: %lf, %lf, %f, %lf\n", values[0], values[1], values[2], values[3]); */
-}
-
+/* Return index of maximum value in array */
 int arrayMax(double *p, int n){
   int i, index;
   double val;
@@ -503,6 +419,8 @@ int arrayMax(double *p, int n){
     }
   return index;
 }
+
+/* Free structure trainOut */
 void freeTo(trainOut *to){
   free(to->labels); to->labels = NULL;
   free(to->startPos); to->startPos = NULL;
@@ -510,6 +428,7 @@ void freeTo(trainOut *to){
   free(to);
 }
 
+/* Copy model to another model structure */
 void copyModel(model *m, model *mc){
   int i, j, k;
   motifStruct *m1, *m2;
@@ -518,15 +437,12 @@ void copyModel(model *m, model *mc){
   mc->n = m->n;
   mc->alpha = m->alpha;
   mc->zoops = m->zoops;
-  /* mc->minWidth = m->minWidth; */
-  /* mc->maxWidth = m->maxWidth; */
   for(i = 0; i < mc->mode; i++){
     (mc->mWidth)[i] = (m->mWidth)[i];
     m1 = (mc->motifs)[i].motif;
     m2 = (m->motifs)[i].motif;
     for(j = 0; j < (mc->mWidth)[i]; j++){
       for(k = 0; k < mc->featureValues; k++){
-	/* (mc->modeMotifCount)[i][j][k] = (m->modeMotifCount)[i][j][k]; */
 	(m1->modeMotifCount)[k] = (m2->modeMotifCount)[k];
       }
       m1 = m1->next;
@@ -536,12 +452,14 @@ void copyModel(model *m, model *mc){
   }
 }
 
+/* Copy values from one array to another */
 void copyLabels(int *lp1, int *lp2, int n){
   int i;
   for(i = 0; i < n; i++)
     lp2[i] = lp1[i];
 }
 
+/* Check if motif contains N instead of A, C, G, T */
 int motifWithN(int *data, int start, int width){
   int i;
   for(i = start; i < start + width; i++)
@@ -549,12 +467,11 @@ int motifWithN(int *data, int start, int width){
   return 0;
 }
 
+/* Initialize labels and stat positions for a given model */
 void initializeLabelStartPos(dataSet *ds, int *labels, int *startPos, int mode, int *pos, unsigned int *seed){
   int i, count;
   for(i = 0; i < ds->n; i++){
-    //    labels[i] = rand()%(mode);
     labels[i] = rand_r(seed)%(mode);
-    //    labels[i] = ((int)erand48(seed)*RAND_MAX)%(mode);
     if((ds->features)[i] - pos[labels[i]] + 1 <= 0){
       startPos[i] = -1;
       continue;
@@ -562,16 +479,14 @@ void initializeLabelStartPos(dataSet *ds, int *labels, int *startPos, int mode, 
     count = 0;
     while(count < 20){
       startPos[i] = rand_r(seed)%((ds->features)[i] - pos[labels[i]] + 1);
-      //      startPos[i] = rand()%((ds->features)[i] - pos[labels[i]] + 1);
-      //      startPos[i] = ((int)erand48(seed)*RAND_MAX)%((ds->features)[i] - pos[labels[i]] + 1);
       if(motifWithN((ds->data)[i], startPos[i], pos[labels[i]])) count++;
       else break;
     }
-    //    if(count == 20) printMessages(5, NULL);
     if(count == 20) startPos[i] = -1;
   }
 }
 
+/* Sample n random values from given set of values */
 int* nRandomPos(int posCount, int size, int lastPos, unsigned int *seed){
   int *arr, i, n, num, *numArr;
   arr = (int*)malloc(sizeof(int)*posCount);
@@ -594,6 +509,7 @@ int* nRandomPos(int posCount, int size, int lastPos, unsigned int *seed){
   return arr;
 }
 
+/* Normalize values in array */
 double* normalize(int *a, int n){
   double sum;
   double *values;
@@ -608,6 +524,8 @@ double* normalize(int *a, int n){
   for(i = 0; i < n; i++) values[i] = values[i]/sum;
   return values;
 }
+
+/* Find minimum of two values */
 int min(int a, int b){
   if(a < b) return a;
   else return b;
@@ -621,31 +539,18 @@ int** getFeatureCounts(dataSet *ds, int mode, int initialWidth){
   for(i = 0; i < ds->n; i++){
     counts[i] = (int*)malloc(sizeof(int)*size);
     if(!counts[i]) printMessages(0, NULL);
-    /* modeFeatureCount(ds, counts, motifWidth, 0); */
-    /* printf("here\n"); */
-    /* for(j = 1; j < maxModeCount; j++) counts[i][j] = counts[i][0]; */
   }
-
   modeFeatureCount(ds, counts, initialWidth, 0);
   for(i = 0; i < ds->n; i++)
     for(j = 1; j < size; j++)
       counts[i][j] = counts[i][0];
-
-  //  for(i = 0; i < size; i++) modeFeatureCount(ds, counts, minWidth + i, i);
-  /* modeFeatureCount(ds, counts, motifWidth, 0); */
-  /* for(i = 0; i < ds->n; i++) */
-  /*   for(j = 1; j < maxModeCount; j++) counts[i][j] = counts[i][0]; */
-
   return counts;
 }
 
+/* Get counts for all modes */
 void modeFeatureCount(dataSet *ds, int **counts, int motifWidth, int index){
   int i, j, k;
-  /* counts = (int**)malloc(sizeof(int*)*ds->n); */
-  /* if(!counts) printMessages(0, NULL); */
   for(i = 0; i < ds->n; i++){
-    /* counts[i] = (int*)malloc(sizeof(int)*maxModeCount); */
-    /* if(!counts[i]) printMessages(0, NULL); */
     counts[i][index] = 0;
     for(j = 0; j < (ds->features)[i]; j++){
       counts[i][index]++;
@@ -663,6 +568,7 @@ void modeFeatureCount(dataSet *ds, int **counts, int motifWidth, int index){
   }
 }
 
+/* Check if there is N istead of A, C, G, T */
 int** lookForN(dataSet *ds){
   int i, j, **lookahead, count;
   lookahead = (int**)malloc(sizeof(int*)*ds->n);

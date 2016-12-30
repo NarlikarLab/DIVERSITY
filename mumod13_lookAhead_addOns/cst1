@@ -1,4 +1,8 @@
+# first half of the cstructures.py file
+
 from ctypes import *
+
+# create ctypes for c data structures dataSet and trainOut
 
 class DataSet(Structure):
     _fields_ = [("data", POINTER(POINTER(c_int))), ("features", POINTER(c_int)), ("lookAhead", POINTER(POINTER(c_int))), ("featureValues", c_int), ("n", c_int), ("tu", c_int)]
@@ -12,6 +16,8 @@ def getCArray(l, c):  # Convert Python list to C ID array
     num = arrOfN()
     for i in xrange(n): num[i] = l[i]
     return num
+
+# convert c structure trainOut to python dictionary
 
 def getTrainOut(to, mode, n):
     d = {}
