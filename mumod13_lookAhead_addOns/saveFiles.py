@@ -126,7 +126,7 @@ def saveLogosMode(dataFile, trainOut, mode, dirname):
     return dataList
 
 # save model information for a given model
-def saveInfoFileMode(dataFile, trainOut, mode, filename):
+def saveInfoFileMode(dataFile, trainOut, mode, likesInfoFile, filename):
     seqName = []
     with open(dataFile) as infile:
         for line in infile:
@@ -142,6 +142,15 @@ def saveInfoFileMode(dataFile, trainOut, mode, filename):
     width = []
     strand = []
 
+    pMode = []
+    likes = []
+    with open(likesInfoFile) as infile:
+        for line in infile:
+            l = line.strip().split()
+            l = map(lambda x: float(x), l)
+            if not pMode: pMode = l
+            else: likes.append(l)
+    
     for i in range(n):
         label.append(trainOut['labels'][i])
         start.append(trainOut['startPos'][i])
@@ -166,15 +175,17 @@ def saveInfoFileMode(dataFile, trainOut, mode, filename):
             if checkFormat: start[i] = int(str.split((str.split(seqName[i], ":")[1]), "-")[0]) + ldi - start[i] 
 
     f = open(filename, "w")
-    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\n")
+    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\tP(X_i|mode)\tP(X_i)\n")
 
     j = 0
     for i in range(n):
-        if label[i] == -1: f.write(seqName[i] + "\t-1\t-1\t-1\t-1\n")
+        l = str(sum(map(lambda x: likes[i][x]*pMode[x], range(mode))))
+        if label[i] == -1: f.write(seqName[i] + "\t-1\t-1\t-1\t-1\t0\t" + l + "\n")
         else:
-            f.write(seqName[i] + "\t" + str(label[i]) + "\t" + str(start[i]) + "\t" + strand[j] + "\t" + data[i] + "\n")
+            f.write(seqName[i] + "\t" + str(label[i]) + "\t" + str(start[i]) + "\t" + strand[j] + "\t" + data[i] + "\t" + str(likes[i][label[i]]) + "\t" + l + "\n")
             j = j + 1
     f.close()
+    os.system("rm -f " + likesInfoFile)
 
 # save model information for all learned models
 def saveInfoFiles(d, trainOut):
@@ -215,7 +226,7 @@ def saveModeDetails(d, trainOut, seed, mode):
 # save model information for all trials
 def saveModeTrialDetails(d, trainOut, trial, mode):
     if d['-v'] != 0: plotFigures.plotSingleFile(d, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial))
-    saveInfoFileMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial) + "/info.txt")
+    saveInfoFileMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial) + "/likes.info", d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial) + "/info.txt")
     motifs = saveLogosMode(d['-f'], trainOut, mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial))
     savePSSMMode(motifs, len(trainOut['labels']), mode, d['-o'][1] + "/mode_" + str(mode) + "/Trial_" + str(trial) + "/pssm.txt", trainOut['likelihood'])
     

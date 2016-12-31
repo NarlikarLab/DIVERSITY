@@ -390,7 +390,7 @@ double EMLike(model *m, dataSet *ds, int *labels, int *startPos, double **backgr
 }
 
 /* model training */
-trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename){
+trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
   double maxLikelihood, tmpLikelihood, *modeLikes;
   int i, j, j1, k, oldLabel, oldStart, flag, count;
   int *lpc, *spc;
@@ -746,6 +746,19 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
     }
   }
 
+  /* Save P(X_i | mode) for all X_i's and all modes  */
+  fp = fopen(likelihoodInfoFile, "w");
+  for(i = 0; i < m->mode; i++) fprintf(fp, "%lf\t", ((m->t)[i] + m->alpha) / (m->n + m->mode*m->alpha));
+  fprintf(fp, "\n");
+  for(i = 0; i < ds->n; i++)
+    {
+      for(j = 0; j < m->mode; j++)
+  	fprintf(fp, "%lf\t", likelihoodXi(m, ds, j, startPos[i], i, background[i]));
+      fprintf(fp, "\n");
+    }
+  fclose(fp);
+  
+				 
   /* Save values in trainOut structure and free the rest */
   for(i = 0; i < ds->n; i++) free(featureCounts[i]);
   free(featureCounts);

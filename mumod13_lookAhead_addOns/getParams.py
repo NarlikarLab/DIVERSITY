@@ -7,7 +7,7 @@ def printHelp():
     print "Usage:\n./mumod [options]"
     print "\t-f fasta file(compulsory)"
     print "\t-o output prefix"
-    print "\t-a pseudo count. Default 1"
+    # print "\t-a pseudo count. Default 1"
     print "\t-maskReps mask repeats in sequences. Default 1(mask)"
     print "\t-r include reverse strand while training. Default 1(include)"
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"

@@ -28,6 +28,10 @@ def singleEval(args):
         exit(1)
 
 
+# get path of likelihood info file likes.info to create the final 2 columns of info.txt
+def getLikesInfoFile(params, d):
+    return d['-o'][1] + "/mode_" + str(params[0]) + "/Trial_" + str(params[1]) + "/likes.info"
+
 # get the path of the likelihood file likes.txt when -v is set to 1
 def getLikesNames(params, d):
     if d['-v'] == 0: return "0"
@@ -62,7 +66,7 @@ def multiEval(d, ds, background, pickleFile):
                         joined = joined + 1
                 if procArr[j] == 0 and started < nmodels:
                     print "Starting mode", params[started][0], "seed", params[started][1]
-                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), getLikesNames(params[started], d)], ))
+                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), getLikesNames(params[started], d), getLikesInfoFile(params[started], d)], ))
                     p[j] = pr
                     p[j].start()
                     procArr[j] = params[joined][0]
