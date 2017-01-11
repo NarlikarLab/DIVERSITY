@@ -4,6 +4,7 @@ import multiprocessing.sharedctypes as mpc
 import pickle
 import time
 import saveFiles as sf
+from config import *
 
 lock = mp.Lock()
 lockL = mp.Lock()
@@ -30,12 +31,12 @@ def singleEval(args):
 
 # get path of likelihood info file likes.info to create the final 2 columns of info.txt
 def getLikesInfoFile(params, d):
-    return d['-o'][1] + "/mode_" + str(params[0]) + "/Trial_" + str(params[1]) + "/likes.info"
+    return d['-o'][1] + "/" + modeDir.format(str(params[0])) + "/" + trialDir.format(str(params[1])) + "/" + temporaryInfoFile
 
 # get the path of the likelihood file likes.txt when -v is set to 1
 def getLikesNames(params, d):
     if d['-v'] == 0: return "0"
-    return d['-o'][1] + "/mode_" + str(params[0]) + "/Trial_" + str(params[1]) + "/likes.txt"
+    return d['-o'][1] + "/" + modeDir.format(str(params[0])) + "/" + trialDir.format(str(params[1])) + "/" + likelihoodFile
 
 # call the singleEval() function on multiple models by parallelisation
 def multiEval(d, ds, background, pickleFile):
@@ -105,9 +106,8 @@ def multiEval(d, ds, background, pickleFile):
 def learn(d):
     mode = 4
     seed = 1
-    likeFile = d['-o'][1] + "/likes.txt"
-    outfile = d['-o'][1] + "/test.txt"
-    pickleFile = d['-o'][1] + "/tmpfile.p"
+    outfile = d['-o'][1] + "/" + temporaryDataFile
+    pickleFile = d['-o'][1] + "/" + temporaryBinaryFile
     pickle.dump([], open(pickleFile, "wb"))
 
     # call c function getData to read the FASTA file into a structure

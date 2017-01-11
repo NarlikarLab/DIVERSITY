@@ -1,6 +1,7 @@
 import re
 import sys
 import os
+from config import *
 
 # function to print all the mumod options when user enters ./mumod
 def printHelp():
@@ -80,7 +81,7 @@ def validFile(s):    # Check if string is a valid file
 def validDir(s):    # Check if string is a valid directory
     defVal = 0
     if s == "": 
-        s = "mumodOut"
+        s = defaultDirName
         defVal = 1
     elif s[-1] == "/":
         s = s[:-1]
@@ -101,7 +102,7 @@ def validDir(s):    # Check if string is a valid directory
 
 # get values from command line and process them and store in dictionary
 def getValues():
-    d = {'-f': '', '-r': 1, '-a': 1, '-lambda': 0, '-zoops': 0, '-minWidth': 6, '-o': '', '-minMode': 1, '-maxMode': 10, '-initialWidth': 8, '-lcount': 5, '-proc': 0, '-maskReps': 1, '-v': 0}
+    d = {'-f': '', '-r': defaultReverseStrandFlag, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
     dF = {'-f': validFD, '-r': validR, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
 
     lst = []
@@ -133,13 +134,13 @@ def getValues():
 
     for i in range(d['-minMode'], (d['-maxMode'] + 1)):
         try:
-            os.mkdir(d['-o'][1] + "/mode_" + str(i))
+            os.mkdir(d['-o'][1] + "/" + modeDir.format(str(i)))
             for j in range(1, (d['-lcount'] + 1)):
                 try:
-                    os.mkdir(d['-o'][1] + "/mode_" + str(i) + "/Trial_" + str(j))
+                    os.mkdir(d['-o'][1] + "/" + modeDir.format(str(i)) + "/" + trialDir.format(str(j)))
                 except:
-                    "ERROR: Cannot create directory" + d['-o'][1] + "/mode_" + str(i) + "/Trial_" + str(j)
+                    "ERROR: Cannot create directory" + d['-o'][1] + "/" + modeDir.format(str(i)) + str(i) + "/" + trialDir.format(str(j))
         except:
-            print "ERROR: Cannot create directory" + d['-o'][1] + "/mode_" + str(i)
+            print "ERROR: Cannot create directory" + d['-o'][1] + "/" + modeDir.format(str(i))
     if d['-v'] != 0: d['-v'] = sysargv[-1] + "makeLikelihoodPlot.pg"
     return d

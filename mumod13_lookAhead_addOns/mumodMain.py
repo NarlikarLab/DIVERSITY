@@ -7,7 +7,7 @@ import saveFiles as sf
 # save settings in file
 
 def saveSettings(d):
-    f = open(d['-o'][1] + "/" + "settings.txt", "w")
+    f = open(d['-o'][1] + "/" + settingsFile, "w")
     f.write("\nInput fasta file: " + os.path.abspath(d['-f']))
     f.write("\n\nOutput prefix: " + os.path.abspath(d['-o'][1]))
     f.write("\n\nMinimum number of modes: " + str(d['-minMode']))
@@ -35,10 +35,10 @@ def printDetails(d):
         if d['-o'][0] != d['-o'][1]:
             print "Directory", d['-o'][0], "was already present"
         print "Output saved in", d['-o'][1]
-    print "Output file consisting of motif positions and strand information would be saved as " + d['-o'][1] + "/info.txt for each mode"
+    print "Output file consisting of motif positions and strand information would be saved as " + d['-o'][1] + "/" + infoFile + " for each mode"
     print "Sequence logos for all motifs of every mode would be saved in each mode directory"
-    print "PSSMs for all motifs of every mode would be saved as " + d['-o'][1] + "/pssm.txt"
-    print("Execution settings will be saved as " + d['-o'][1] + "/" + "settings.txt")
+    print "PSSMs for all motifs of every mode would be saved as " + d['-o'][1] + "/" + pssmFile
+    print("Execution settings will be saved as " + d['-o'][1] + "/" + settingsFile)
     print "\n\n"
 
 # function that calls the training function and then calls another function to save details

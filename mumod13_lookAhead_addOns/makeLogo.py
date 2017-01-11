@@ -1,5 +1,6 @@
 import weblogoMod.weblogolib as wl
 import sys
+from config import *
 
 # function to create a logo using modified Weblogo3.3 from given sequences
 def createLogo(sequences, filename):
@@ -71,6 +72,6 @@ def getLogos():
 
     for i in range(modes): 
         print "Width", width[i]
-        createLogo(dataList[i], "mode_" + str(i) + ".png")
+        createLogo(dataList[i], modeDir.format(str(i)) + ".png")
 
 getLogos()

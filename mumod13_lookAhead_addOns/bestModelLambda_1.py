@@ -1,15 +1,16 @@
 import pickle
 import os
 import sys
+from config import *
 
 def saveBestModel(dirname, lmbda, mode):
-    os.system("cp -r " + dirname + "/mode_" + str(mode) + " " + dirname + "/bestModelLambda" + str(lmbda))
+    os.system("cp -r " + dirname + "/" + modeDir.format(str(mode)) + " " + dirname + "/bestModelLambda" + str(lmbda))
 
 def chooseBestModel(dirname1, dirname2, lmbda):
-    with open(dirname1 + "/models.bin.p", "rb") as f:
+    with open(dirname1 + "/" + modelBinaryFile, "rb") as f:
         l1 = pickle.load(f)
     likes1 = [x[0] - 3*lmbda*sum(x[1]) for x in l1]
-    with open(dirname2 + "/models.bin.p", "rb") as f:
+    with open(dirname2 + "/" + modelBinaryFile, "rb") as f:
         l2 = pickle.load(f)
     likes2 = [x[0] - 3*lmbda*sum(x[1]) for x in l2]
     index1 = likes1.index(max(likes1))
