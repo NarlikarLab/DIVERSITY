@@ -1,5 +1,6 @@
 defaultAlpha = 1
 defaultDirName = "mumodOut"
+defaultFastCount = 1
 defaultInitialWidth = 8
 defaultLearnCount = 5
 defaultMaskReps = 1

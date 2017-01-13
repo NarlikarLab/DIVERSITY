@@ -10,6 +10,7 @@ def printHelp():
     print "\t-o output prefix"
     # print "\t-a pseudo count. Default 1"
     print "\t-maskReps mask repeats in sequences. Default 1(mask)"
+    print "\t-fast n. Speed up execution by n times. Results might not be as accurate. Default 1(no speedup)"
     print "\t-r include reverse strand while training. Default 1(include)"
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
@@ -102,8 +103,8 @@ def validDir(s):    # Check if string is a valid directory
 
 # get values from command line and process them and store in dictionary
 def getValues():
-    d = {'-f': '', '-r': defaultReverseStrandFlag, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
-    dF = {'-f': validFD, '-r': validR, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
+    d = {'-f': '', '-r': defaultReverseStrandFlag, '-fast': defaultFastCount, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
+    dF = {'-f': validFD, '-r': validR, '-fast': validInt, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
 
     lst = []
     sysargv = (sys.argv)[1:]

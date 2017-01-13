@@ -225,6 +225,7 @@ def saveModeDetails(d, trainOut, seed, mode):
 
 # save model information for all trials
 def saveModeTrialDetails(d, trainOut, trial, mode):
+
     if d['-v'] != 0: plotFigures.plotSingleFile(d, d['-o'][1] + "/" + modeDir.format(str(mode)) + "/" + trialDir.format(str(trial)))
     saveInfoFileMode(d['-f'], trainOut, mode, d['-o'][1] + "/" + modeDir.format(str(mode)) + "/" + trialDir.format(str(trial)) + "/" + temporaryInfoFile, d['-o'][1] + "/" + modeDir.format(str(mode)) + "/" + trialDir.format(str(trial)) + "/" + infoFile)
     motifs = saveLogosMode(d['-f'], trainOut, mode, d['-o'][1] + "/" + modeDir.format(str(mode)) + "/" + trialDir.format(str(trial)))

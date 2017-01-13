@@ -390,9 +390,9 @@ double EMLike(model *m, dataSet *ds, int *labels, int *startPos, double **backgr
 }
 
 /* model training */
-trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
+trainOut* trainData(dataSet *ds, int mode, int fast, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
   double maxLikelihood, tmpLikelihood, *modeLikes;
-  int i, j, j1, k, oldLabel, oldStart, flag, count;
+  int i, j, j1, k, oldLabel, oldStart, flag, count, iterations;
   int *lpc, *spc;
   motifStruct *m1;
   int *widths;
@@ -490,9 +490,10 @@ trainOut* trainData(dataSet *ds, int mode, float alpha, float lambda, double zoo
 
   count = 0;
   flag = 0;
-
+  iterations = ds->n/fast;
+  
   /* Iterate over the entire dataset n times where n is the size of the data set */
-  while(j < ds->n){
+  while(j < iterations){
     /* Iterate over all sequences of data set */
     for(i = 0; i < ds->n; i++){
       oldLabel = lpc[i];

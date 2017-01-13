@@ -58,7 +58,7 @@ int main(){
   for(k = 0; k < 1; k++){
     printf("Trial: %d\n", k);
     seed = k + 1;
-    l = trainData(ds, mode, alpha, lambda, zoops, seed, background, mWidth, minWidth, fstr, "test.txt");
+    l = trainData(ds, mode, 1, alpha, lambda, zoops, seed, background, mWidth, minWidth, fstr, "test.txt");
     printf("Likelihood: %lf\n", l->likelihood);
     printf("Widths:\n");
     for(i = 0; i < mode; i++) printf("%d\t", (l->motifWidth)[i]);
