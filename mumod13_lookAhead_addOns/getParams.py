@@ -10,7 +10,7 @@ def printHelp():
     print "\t-o output prefix"
     # print "\t-a pseudo count. Default 1"
     print "\t-maskReps mask repeats in sequences. Default 1(mask)"
-    print "\t-fast n. Speed up execution by n times. Results might not be as accurate. Default 1(no speedup)"
+    print "\t-fast n. n >= 0. Speed up/slow down execution by n times. n > 1 means speed up by n times. 0 < n < 1 means slow down by a factor of n. n = 0 means run till last m (m is number of sequences) likelihood values can have a linear fit (very slow). Default 1"
     print "\t-r include reverse strand while training. Default 1(include)"
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
@@ -48,15 +48,15 @@ def validR(s, opt):    # Check if string is 0 or 1
     s = int(s.group(0))
     return s
 
-def validNum(s, opt):    # Check is string is a valid positive number
+def validNum(s, opt):    # Check if string is a valid non negative number
     s1 = re.search('^[0-9]+?(\.[0-9]+)?\Z', s)
     if s1 is None: 
         print "ERROR: Invalid option: " + opt + " " + s + ". Must be a positive real number"
         printHelp()
     s = s1
     s = float(s.group(0))
-    if s == 0: 
-        printHelp()
+    # if s == 0: 
+    #     printHelp()
     return s
 
 def validNum1(s, opt):    # Check is string is a valid non negative number less than or equal to 1
@@ -104,7 +104,7 @@ def validDir(s):    # Check if string is a valid directory
 # get values from command line and process them and store in dictionary
 def getValues():
     d = {'-f': '', '-r': defaultReverseStrandFlag, '-fast': defaultFastCount, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
-    dF = {'-f': validFD, '-r': validR, '-fast': validInt, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
+    dF = {'-f': validFD, '-r': validR, '-fast': validNum, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
 
     lst = []
     sysargv = (sys.argv)[1:]

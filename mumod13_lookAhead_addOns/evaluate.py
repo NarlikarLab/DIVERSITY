@@ -67,7 +67,7 @@ def multiEval(d, ds, background, pickleFile):
                         joined = joined + 1
                 if procArr[j] == 0 and started < nmodels:
                     print "Starting mode", params[started][0], "seed", params[started][1]
-                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_int(1), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), getLikesNames(params[started], d), getLikesInfoFile(params[started], d)], ))
+                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_float(d['-fast']), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), getLikesNames(params[started], d), getLikesInfoFile(params[started], d)], ))
                     p[j] = pr
                     p[j].start()
                     procArr[j] = params[joined][0]

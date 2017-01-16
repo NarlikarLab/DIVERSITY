@@ -390,7 +390,7 @@ double EMLike(model *m, dataSet *ds, int *labels, int *startPos, double **backgr
 }
 
 /* model training */
-trainOut* trainData(dataSet *ds, int mode, int fast, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
+trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
   double maxLikelihood, tmpLikelihood, *modeLikes;
   int i, j, j1, k, oldLabel, oldStart, flag, count, iterations;
   int *lpc, *spc;
@@ -491,9 +491,14 @@ trainOut* trainData(dataSet *ds, int mode, int fast, float alpha, float lambda, 
   count = 0;
   flag = 0;
   iterations = ds->n/fast;
+  //  if((fast >= 0 && fast < 0.00001) || (fast < 0 && fast > -0.00001)) iterations = 0;
+  if((fast >= 0 && fast < 0.00001)) iterations = 0;
   
+  printf("Iterations: %d, fast: %f\n", iterations, fast);
   /* Iterate over the entire dataset n times where n is the size of the data set */
-  while(j < iterations){
+  while(1){
+    j++;
+    if(j == iterations) break;
     /* Iterate over all sequences of data set */
     for(i = 0; i < ds->n; i++){
       oldLabel = lpc[i];
@@ -583,7 +588,6 @@ trainOut* trainData(dataSet *ds, int mode, int fast, float alpha, float lambda, 
     }
 
 
-    j++;
     count++;
     if(j%(ds->n/10) != 0) continue;
 
