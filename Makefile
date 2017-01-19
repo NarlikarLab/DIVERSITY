@@ -14,7 +14,6 @@ OBJS = $(QSRCS:.c=.o)
 .PHONY: all
 
 all: ${TARGET_LIB}
-	$(CC) $(VAR) $(CFLAGS) -pthread -o main train.c $(LM) -ldatacal
 	cat cst1 > cstructures.py; echo "libctest = cdll.LoadLibrary(\"$(CURDIR)/libdatacal.so\")" >> cstructures.py; cat cst2 >> cstructures.py
 	echo "python $(CURDIR)/diversityMain.py "\"\$$@\"" $(CURDIR)/" > diversity; chmod +x diversity
 
@@ -23,4 +22,4 @@ $(TARGET_LIB): $(OBJS)
 
 .PHONY: clean
 clean:
-	-${RM} ${TARGET_LIB} ${OBJS} $(QSRCS:.c=.d) $(QFILE) *~ *.pyc main diversity cstructures.py 
+	-${RM} ${TARGET_LIB} ${OBJS} $(QSRCS:.c=.d) $(QFILE) *~ *.pyc diversity cstructures.py 
