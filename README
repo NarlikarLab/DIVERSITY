@@ -1,7 +1,7 @@
 
-MuMoD is a motif discovery tool used for finding motifs.
+DIVERSITY is a motif discovery tool used for finding motifs.
 
-The following packages need to be installed in order to run NPLB:
+The following packages need to be installed in order to run DIVERSITY:
  * Python 2.6+ (Not compatible with Python 3.x)
  * python-numpy
  * python-ctypes
@@ -10,18 +10,18 @@ The following packages need to be installed in order to run NPLB:
 
 INSTALLATION:
 
-MuMoD is freely available at ####. Execute the following commands to download and install NPLB:
+DIVERSITY is freely available at ####. Execute the following commands to download and install DIVERSITY:
 wget ####
 tar -xvf ####
 cd ####
 make
 
-To execute MuMoD from anywhere export the path to MuMoD to the PATH variable.
+To execute DIVERSITY from anywhere export the path to DIVERSITY to the PATH variable.
 
 USAGE:
 
-To learn multiple models using mumod:
-(path to MuMoD)/mumod [options]
+To learn multiple models using DIVERSITY:
+(path to DIVERSITY)/diversity [options]
 
 OPTIONS
 
@@ -62,10 +62,10 @@ EXAMPLES
 	The following examples illustrate the usage of the options.
 
 	To run with all the default options:
-	   mumod -f example.fa
+	   diversity -f example.fa
 
 	To run for minimum 6 and maximum 12 modes without masking repeats and initial motif width of 10:
-	   mumod -f example.fa -minMode 6 -maxMode 12 -maskReps 0 -initialWidth 10
+	   diversity -f example.fa -minMode 6 -maxMode 12 -maskReps 0 -initialWidth 10
 
 	To find list of options:
-	   mumod
+	   diversity

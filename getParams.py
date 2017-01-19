@@ -3,9 +3,9 @@ import sys
 import os
 from config import *
 
-# function to print all the mumod options when user enters ./mumod
+# function to print all the diversity options when user enters ./diversity
 def printHelp():
-    print "Usage:\n./mumod [options]"
+    print "Usage:\n./diversity [options]"
     print "\t-f fasta file(compulsory)"
     print "\t-o output prefix"
     # print "\t-a pseudo count. Default 1"

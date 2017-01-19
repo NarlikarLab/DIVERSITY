@@ -1,5 +1,5 @@
 defaultAlpha = 1
-defaultDirName = "mumodOut"
+defaultDirName = "diversityOut"
 defaultFastCount = 1
 defaultInitialWidth = 8
 defaultLearnCount = 5
@@ -15,7 +15,7 @@ likelihoodFile = "likes.txt"
 likelihoodPlotFile = "likes.png"
 likelihoodTrialFile = "likes_{}.txt"
 modeDir = "modelWith_{}_modes"
-modelBinaryFile = "model.bin.p"
+modelBinaryFile = "models.bin.p"
 motifLogoName = "logo_{}.png"
 motifLogoReverseName = "logo_rev_{}.png"
 pssmFile = "pssm.txt"

@@ -494,7 +494,6 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
   //  if((fast >= 0 && fast < 0.00001) || (fast < 0 && fast > -0.00001)) iterations = 0;
   if((fast >= 0 && fast < 0.00001)) iterations = 0;
   
-  printf("Iterations: %d, fast: %f\n", iterations, fast);
   /* Iterate over the entire dataset n times where n is the size of the data set */
   while(1){
     j++;
