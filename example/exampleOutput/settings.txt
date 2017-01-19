@@ -1,0 +1,22 @@
+
+Input fasta file: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/example/example.fa
+
+Output prefix: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/exampleOutput
+
+Minimum number of modes: 5
+
+Maximum number of modes: 9
+
+Number of models to be learnt per mode: 5
+
+Minimum motif width: 6
+
+Initial motif width: 8
+
+Mask repeats: Yes
+
+Include reverse strand: Yes
+
+ZOOPS: 0
+
+Maximum number of cores used: 8
