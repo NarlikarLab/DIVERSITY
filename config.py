@@ -1,7 +1,7 @@
 defaultAlpha = 1
 defaultDirName = "diversityOut"
 defaultFastCount = 1
-defaultInitialWidth = 8
+defaultInitialWidth = 12
 defaultLearnCount = 5
 defaultMaskReps = 1
 defaultMaxMode = 10

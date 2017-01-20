@@ -14,7 +14,7 @@ def printHelp():
     print "\t-r include reverse strand while training. Default 1(include)"
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
-    print "\t-initialWidth starting width of motifs. Default 8"
+    print "\t-initialWidth starting width of motifs. Default 12"
     print "\t-minMode minimum number of modes. Default 1"
     print "\t-maxMode maximum number of modes. Default 10"
     print "\t-lcount number of models to be learned while training. Best model is considered. Default 5"
