@@ -198,14 +198,14 @@ def saveInfoFileMode(dataFile, trainOut, mode, likesInfoFile, filename):
             if checkFormat: start[i] = int(str.split((str.split(seqName[i], ":")[1]), "-")[0]) + ldi - start[i] 
 
     f = open(filename, "w")
-    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\tP(X_i|mode)\tP(X_i)\n")
+    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\tP(X_i)\n")
 
     j = 0
     for i in range(n):
         l = str(sum(map(lambda x: likes[i][x]*pMode[x], range(mode))))
         if label[i] == -1: f.write(seqName[i] + "\t-1\t-1\t-1\t-1\t0\t" + l + "\n")
         else:
-            f.write(seqName[i] + "\t" + str(label[i]) + "\t" + str(start[i]) + "\t" + strand[j] + "\t" + data[i] + "\t" + str(likes[i][label[i]]) + "\t" + l + "\n")
+            f.write(seqName[i] + "\t" + str(label[i]) + "\t" + str(start[i]) + "\t" + strand[j] + "\t" + data[i] + "\t" + l + "\n")
             j = j + 1
     f.close()
     os.system("rm -f " + likesInfoFile)
