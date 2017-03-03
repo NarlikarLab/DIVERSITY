@@ -145,6 +145,9 @@ def getValues():
         else:
             print "ERROR: Invalid option", s
             printHelp()
+    if(d['-minWidth'] > d['-initialWidth']):
+        print "ERROR: -initialWidth cannot be less than -minWidth"
+        exit(2)
     if(d['-maxMode'] < d['-minMode']):
         print "ERROR: -maxMode cannot be less than -minMode"
         exit(2)
