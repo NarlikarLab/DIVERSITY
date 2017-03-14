@@ -198,7 +198,7 @@ def saveInfoFileMode(dataFile, trainOut, mode, likesInfoFile, filename):
             if checkFormat: start[i] = int(str.split((str.split(seqName[i], ":")[1]), "-")[0]) + ldi - start[i] 
 
     f = open(filename, "w")
-    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\tP(X_i)\n")
+    f.write("#sequenceName\tmodeNumber\tpositionInSequence\tstrand\tsite\tScore\n")
 
     j = 0
     for i in range(n):

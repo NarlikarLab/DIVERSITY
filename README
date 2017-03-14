@@ -2,7 +2,7 @@
 DIVERSITY is a motif discovery tool used for finding motifs.
 
 The following packages need to be installed in order to run DIVERSITY:
- * Python 2.6+ (Not compatible with Python 3.x)
+ * Python 2.7+ (Not compatible with Python 3.x)
  * python-numpy
  * python-ctypes
  * python-multiprocessing
