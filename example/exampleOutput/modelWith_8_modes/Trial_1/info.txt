@@ -1,4 +1,4 @@
-#sequenceName	modeNumber	positionInSequence	strand	site	P(X_i)
+#sequenceName	modeNumber	positionInSequence	strand	site	Score
 seq	2	16	-	CATGTTTCTCG	318.220074529
 seq	0	25	+	TGCAGGGCGTT	95.5472770421
 seq	7	2	+	GAATCCGTTGCG	29.6144299355

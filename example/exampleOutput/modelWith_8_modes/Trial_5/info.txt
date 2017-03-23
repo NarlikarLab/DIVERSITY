@@ -1,4 +1,4 @@
-#sequenceName	modeNumber	positionInSequence	strand	site	P(X_i)
+#sequenceName	modeNumber	positionInSequence	strand	site	Score
 seq	3	76	-	ATCCTCCACTG	412.484252297
 seq	3	45	+	ACTGACCGATA	43.2023211183
 seq	7	32	-	TATGGTCCCTTC	2.31221502559

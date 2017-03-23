@@ -1,7 +1,7 @@
 
-Input fasta file: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/example/example.fa
+Input fasta file: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY/example/example.fa
 
-Output prefix: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/exampleOutput
+Output prefix: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY/example/exampleOutput
 
 Minimum number of modes: 5
 

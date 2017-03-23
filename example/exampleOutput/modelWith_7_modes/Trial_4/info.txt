@@ -1,4 +1,4 @@
-#sequenceName	modeNumber	positionInSequence	strand	site	P(X_i)
+#sequenceName	modeNumber	positionInSequence	strand	site	Score
 seq	5	25	+	AGTGGAGGATTC	548.025280194
 seq	0	38	-	TCACTTCCAAAA	44.0408233576
 seq	0	97	-	TCGCAACGGATT	4.96023989624

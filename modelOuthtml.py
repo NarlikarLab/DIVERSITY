@@ -19,29 +19,31 @@
 
 ######################################################
 
-import pickle
-import os
+# Create HTML file
+
 import sys
+import os
 from config import *
 
-def saveBestModel(dirname, lmbda, mode):
-    os.system("cp -r " + dirname + "/" + modeDir.format(str(mode)) + " " + dirname + "/bestModelLambda" + str(lmbda))
+def createHTML(infastafile, opdir, minMode, maxMode, bestModel):
+    f = file(opdir+'/' + htmlFile,'w')
+    f.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>MODEL</h1>\n")
+    f.write("<h3> Input File: "+ infastafile + " </h3>\n")
+    f.write("<h3> Number of models learned: "+str(maxMode-minMode+1)+" </h3>\n")
+    f.write("<h3> Number of modes in best model: "+str(bestModel)+" </h3>\n")
+    logodir = modeDir.format(bestModel)
 
-def chooseBestModel(dirname, lmbda):
-    with open(dirname + "/" + modelBinaryFile, "rb") as f:
-        l = pickle.load(f)
-    likes = [x[0] - 3*lmbda*sum(x[1]) for x in l]
-    index = likes.index(max(likes))
-    print "\n\nLambda:", lmbda
-    print "#modes likelihood penalized"
-    for i in range(len(likes)):
-        print len(l[i][1]), l[i][0], likes[i]
-    mode = len(l[index][1])
-    return len(l[index][1])
+    for i in range(bestModel):
+        f.write("<h4> Mode " + str(i + 1) + "</h4>\n")
+        f.write("<img src=\"" + logodir + "/" + motifLogoName.format(i) + "\" style=\"border:thin solid black\">\n")
 
+    f.write("<p><i>NOTE: Best model is chosen using lambda = 5</i></p>\n")
+    f.write("</body>\n</html>\n")
+    f.close()
 
 if __name__ == '__main__':
-    d = (sys.argv)[1]
-    v = chooseBestModel(d, 5)
-    print "\nBest Model:", v
-
+    infastafile = sys.argv[1]
+    opdir = sys.argv[2]
+    minMode = int(sys.argv[3])
+    maxMode = int(sys.argv[4])
+    createHTML(infastafile, opdir, minMode, maxMode, 5)

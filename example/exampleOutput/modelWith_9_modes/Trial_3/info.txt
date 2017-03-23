@@ -1,4 +1,4 @@
-#sequenceName	modeNumber	positionInSequence	strand	site	P(X_i)
+#sequenceName	modeNumber	positionInSequence	strand	site	Score
 seq	2	68	-	AGAGGTCGAATC	58.9942938515
 seq	4	58	+	TTATTTTTGGAA	15.132371415
 seq	8	91	-	GGACCATCGCAA	125.371029552

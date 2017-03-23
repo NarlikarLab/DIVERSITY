@@ -1,4 +1,4 @@
-#sequenceName	modeNumber	positionInSequence	strand	site	P(X_i)
+#sequenceName	modeNumber	positionInSequence	strand	site	Score
 seq	7	28	+	GGAGGATTCGA	4.23230334457
 seq	7	100	-	GGGAGACTGTT	43.5901877628
 seq	5	39	+	CATTACTAATC	16.1931838082

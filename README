@@ -10,10 +10,10 @@ The following packages need to be installed in order to run DIVERSITY:
 
 INSTALLATION:
 
-DIVERSITY is freely available at ####. Execute the following commands to download and install DIVERSITY:
-wget ####
-tar -xvf ####
-cd ####
+DIVERSITY is freely available at https://github.com/NarlikarLab/DIVERSITY. Execute the following commands to download and install DIVERSITY:
+wget https://github.com/NarlikarLab/DIVERSITY/archive/v1.0.0.tar.gz
+tar -xvf v1.0.0.tar.gz
+cd DIVERSITY-1.0.0/
 make
 
 To execute DIVERSITY from anywhere export the path to DIVERSITY to the PATH variable.
@@ -29,7 +29,7 @@ OPTIONS
 	   Compulsory. Data file for which motifs are to be identified. File must be in fasta format.
 
 	-o directory
-	   Valid directory name. If it exists then a new one is create with given name along with an extension number. Default directory: ###<extension> in the current working directory.
+	   Valid directory name. If it exists then a new one is create with given name along with an extension number. Default directory: diversityOut in the current working directory.
 
 	-maskReps 0 or 1
 		  Mask repeats by replacing them with 'N'. 0 implies do not mask. Default value: 1
