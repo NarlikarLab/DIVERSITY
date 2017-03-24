@@ -30,6 +30,7 @@ import plotFigures
 from config import *
 from bestModelLambda import chooseBestModel
 from modelOuthtml import createHTML
+from modelOuthtmlAll import createHTMLAll
 
 def readData(dataFile):
     data = []
@@ -259,6 +260,7 @@ def saveModeTrialDetails(d, trainOut, trial, mode):
 def saveHTML(d):
     bestModel = chooseBestModel(d['-o'][1], defaultLambda)
     createHTML(d['-f'], d['-o'][1], d['-minMode'], d['-maxMode'], bestModel)
+    createHTMLAll(d['-f'], d['-o'][1], d['-minMode'], d['-maxMode'], bestModel)
     
 def saveDetails(d, to):
     trainOut, modelSeeds = zip(*to)
