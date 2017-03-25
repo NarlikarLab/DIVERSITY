@@ -25,18 +25,22 @@ import sys
 import os
 from config import *
 
-def createHTML(infastafile, opdir, minMode, maxMode, bestModel):
-    f = file(opdir+'/' + htmlFile,'w')
+def createHTML(infastafile, opdir, minMode, maxMode, modelMode):
+    f = file(opdir+'/' + htmlFileMode.format(modelMode),'w')
     f.write("<!DOCTYPE html>\n<html>\n<body>\n<h1>MODEL</h1>\n")
     f.write("<h3> Input File: "+ infastafile + " </h3>\n")
     f.write("<h3> Number of models learned: "+str(maxMode-minMode+1)+" </h3>\n")
-    f.write("<h3> Number of modes in best model: "+str(bestModel)+" </h3>\n")
-    logodir = modeDir.format(bestModel)
+    f.write("<h3> Number of modes: "+str(modelMode)+" </h3>\n")
+    logodir = modeDir.format(modelMode)
 
-    for i in range(bestModel):
+    for i in range(modelMode):
+        
         f.write("<h4> Mode " + str(i + 1) + "</h4>\n")
+        f.write("<h5> Forward strand motif</h5>\n")
         f.write("<img src=\"" + logodir + "/" + motifLogoName.format(i) + "\" style=\"border:thin solid black\">\n")
-
+        f.write("<h5> Reverse strand motif</h5>\n")
+        f.write("<img src=\"" + logodir + "/" + motifLogoReverseName.format(i) + "\" style=\"border:thin solid black\">\n")
+        f.write("<br>\n")
     f.write("<p><i>NOTE: Best model is chosen using lambda = 5</i></p>\n")
     f.write("</body>\n</html>\n")
     f.close()
@@ -46,4 +50,4 @@ if __name__ == '__main__':
     opdir = sys.argv[2]
     minMode = int(sys.argv[3])
     maxMode = int(sys.argv[4])
-    createHTML(infastafile, opdir, minMode, maxMode, 5)
+    createHTML(infastafile, opdir, minMode, maxMode, defaultLambda)

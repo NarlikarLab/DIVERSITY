@@ -259,7 +259,7 @@ def saveModeTrialDetails(d, trainOut, trial, mode):
 # save best model in HTML format
 def saveHTML(d):
     bestModel = chooseBestModel(d['-o'][1], defaultLambda)
-    createHTML(d['-f'], d['-o'][1], d['-minMode'], d['-maxMode'], bestModel)
+    for i in range(d['-minMode'], d['-maxMode'] + 1): createHTML(d['-f'], d['-o'][1], d['-minMode'], d['-maxMode'], i)
     createHTMLAll(d['-f'], d['-o'][1], d['-minMode'], d['-maxMode'], bestModel)
     
 def saveDetails(d, to):

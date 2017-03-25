@@ -1,7 +1,7 @@
 
 Number of sequences: 1000
 Number of modes: 6
-Likelihood: -843.906581751
+Likelihood: -844.971010305
 
 
 MOTIF: 0 (46 sequences, width 12)

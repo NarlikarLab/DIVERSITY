@@ -34,10 +34,10 @@ def createHTMLAll(infastafile, opdir, minMode, maxMode, bestModel):
     logodir = modeDir.format(bestModel)
 
     for j in range(minMode, maxMode + 1):
-        f.write("<h4> Model " + str(j))
-        if j == bestModel: f.write("<a href=\"" + htmlFile + "\">(Best model)</a>")
-        f.write("</h4>\n")
+        s = "(Best model)" if j == bestModel else ""
+        f.write("<h4><a href=\"" + htmlFileMode.format(j) + "\">Model " + str(j) + s + "</a></h4>\n")
         logodir = modeDir.format(j)
+        f.write("<h5>Forward strand motifs</h5>\n")
         f.write("<div id=\"logo_images\">\n")
         for i in range(j):
             if os.path.isfile(opdir + "/" + logodir + "/" + motifLogoName.format(i)):
@@ -47,8 +47,21 @@ def createHTMLAll(infastafile, opdir, minMode, maxMode, bestModel):
 		f.write("</figure>\n")
             else:
                 continue
-    f.write("</div>\n")
-    f.write("<br>\n")
+        f.write("</div>\n")
+        f.write("<br>\n")
+        f.write("<h5>Reverse strand motifs</h5>\n")
+        f.write("<div id=\"logo_images\">\n")
+        for i in range(j):
+            if os.path.isfile(opdir + "/" + logodir + "/" + motifLogoReverseName.format(i)):
+                f.write("<figure>\n")
+                f.write("<img height=\"50px\" width=\"200px\" src=\"" + logodir + "/" + motifLogoReverseName.format(i) + "\">\n")
+                f.write("<figcaption><i> " + "mode_" + str(i + 1) + "</i></figcaption>\n")
+		f.write("</figure>\n")
+            else:
+                continue
+        f.write("</div>\n")
+        f.write("<br>\n")
+
     f.write("<style>\n\t div{padding:0;}\n\t figure{display: inline-block;}\n\t img{height:auto;}\n\t")
     f.write("figure figcaption{border:35px black; text-align:center;}\n\t")
     f.write("th,td{text-align:center;border-spacing:10px;border:1px solid black;height:50px;width:100px;}\n</style>\n")
