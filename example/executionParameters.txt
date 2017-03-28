@@ -1,3 +1,3 @@
 Run DIVERSITY with the follwoing command to generate output similar to exampleOutput
 
-diversity -f example.fa -minMode 5 -maxMode 9 -v 1 -o exampleOutput
+diversity -f GM12878.fa -minMode 5 -maxMode 9 -v 1 -o exampleOutput

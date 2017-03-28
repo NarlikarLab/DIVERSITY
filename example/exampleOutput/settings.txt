@@ -1,5 +1,5 @@
 
-Input fasta file: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/example/example.fa
+Input fasta file: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/example/GM12878.fa
 
 Output prefix: /home/home3/sneha/Leelavati/gitUpload/DIVERSITY_local/example/exampleOutput
 
