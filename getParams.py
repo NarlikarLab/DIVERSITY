@@ -38,7 +38,7 @@ def printHelp():
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
     print "\t-initialWidth starting width of motifs. Default 12"
-    print "\t-minMode minimum number of modes. Default 1"
+    print "\t-minMode minimum number of modes. Default 3"
     print "\t-maxMode maximum number of modes. Default 10"
     print "\t-lcount number of models to be learned while training. Best model is considered. Default 5"
     print "\t-proc maximum number of processing units to use for computation. Default is the number of processing units the system has"

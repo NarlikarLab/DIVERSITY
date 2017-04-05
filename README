@@ -47,7 +47,7 @@ OPTIONS
 		      Starting width of motifs while training models. Default value: 12
 
 	-minMode non negative integer
-		 Minimum number of modes possible for given dataset. Default value: 1
+		 Minimum number of modes possible for given dataset. Default value: 3
 
 	-maxMode non negative integer
 		 Maximum number of modes possible for given dataset. Default value: 10
