@@ -38,7 +38,9 @@ OPTIONS
 	   Look for motifs in the reverse strand as well. 1 implies looking for motifs in both strand. Default value: 1
 
 	-zoops real number between 0 and 1 (including 0 and 1)
-	       Zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0.
+	       0 insists on all sequences to have a motif (default). 1 to
+	       let the sequence length decide prior on presence of
+	       motifs. Value strictly between 0 and 1 is the probability of a sequence not having a motif.
 
 	-minWidth non negative integer
 		  Minimum width of motifs while training models. Default value: 6
