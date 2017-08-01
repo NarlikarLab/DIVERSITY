@@ -45,6 +45,12 @@ OPTIONS
 	-minWidth non negative integer
 		  Minimum width of motifs while training models. Default value: 6
 
+	-maxWidth non negative integer
+		  Maximum width of motifs while training models. If value
+		  is greater than length of sequence then maximum motif
+		  width is limited to length of sequence. Default
+		  value: no maximum width
+
 	-initialWidth non negative integer
 		      Starting width of motifs while training models. Default value: 12
 

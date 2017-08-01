@@ -71,6 +71,9 @@ def multiEval(d, ds, background, pickleFile):
     params = sum(map(lambda x: map(lambda y: (x, y), seeds), range(d['-minMode'], (d['-maxMode'] + 1))), [])
     counts = [0 for i in range(d['-maxMode'] - d['-minMode'] + 1)]
 
+    # if no maxWidth, change to 0 for computations
+    if not(d['-maxWidth']): d['-maxWidth'] = 0
+
     nmodels = len(params)
     joined = 0
     started = 0
@@ -90,7 +93,7 @@ def multiEval(d, ds, background, pickleFile):
                         joined = joined + 1
                 if procArr[j] == 0 and started < nmodels:
                     print "Starting mode", params[started][0], "seed", params[started][1]
-                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_float(d['-fast']), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), getLikesNames(params[started], d), getLikesInfoFile(params[started], d)], ))
+                    pr = mp.Process(target = singleEval, args = ([lock, pickleFile, ds, c_int(params[started][0]), c_float(d['-fast']), c_float(d['-a']), c_float(d['-lambda']), c_double(d['-zoops']), c_uint(params[started][1]), background, getCArray([d['-initialWidth'] for i in range(params[started][0])], c_int), c_int(d['-minWidth']), c_int(d['-maxWidth']), getLikesNames(params[started], d), getLikesInfoFile(params[started], d)], ))
                     p[j] = pr
                     p[j].start()
                     procArr[j] = params[joined][0]

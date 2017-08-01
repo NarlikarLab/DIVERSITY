@@ -51,10 +51,10 @@ double calculateLikelihoodFaster(model*);
 double calculateLikelihoodSingleMode(model*, int);
 int sampleNewLabel(model*, dataSet*, int*, int, unsigned int*, int, double*, int*);
 int sampleStartPos(model*, dataSet*, int, int, unsigned int*, int, double*);
-int sampleMotifWidthLeft(dataSet*, model*, double**, int*, int*, int, int, unsigned int*);
-int sampleMotifWidthRight(dataSet*, model*, double**, int*, int*, int, int, unsigned int*);
+int sampleMotifWidthLeft(dataSet*, model*, double**, int*, int*, int, int, int, unsigned int*);
+int sampleMotifWidthRight(dataSet*, model*, double**, int*, int*, int, int, int, unsigned int*);
 double EMLike(model*, dataSet*, int*, int*, double**);
-trainOut* trainData(dataSet*, int, float, float, float, double, unsigned int, double**, int*, int, char*, char*);
+trainOut* trainData(dataSet*, int, float, float, float, double, unsigned int, double**, int*, int, int, char*, char*);
 double likelihoodXi(model*, dataSet*, int, int, int, double*);
 double likelihoodXiFaster(model*, dataSet*, int, int, int, double*);
 #endif

@@ -29,6 +29,7 @@ defaultLambda = 5
 defaultLearnCount = 5
 defaultMaskReps = 1
 defaultMaxMode = 10
+defaultMaxWidth = None
 defaultMinMode = 3
 defaultMinWidth = 6
 defaultReverseStrandFlag = 1

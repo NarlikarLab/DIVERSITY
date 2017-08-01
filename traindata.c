@@ -354,24 +354,27 @@ int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *see
 }
 
 /* Compute the width increase/decrease of a given motif from the left */
-int sampleMotifWidthLeft(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, unsigned int *seed){
+int sampleMotifWidthLeft(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, int maxWidth, unsigned int *seed){
   int i;
   double *values;
+
   values = (double*)malloc(sizeof(double)*3);
   if(!values) printMessages(0, NULL);
   values[0] = 1;
   values[1] = motifRemoveLeftScore(ds, m, background, labels, startPos, mode);
   values[2] = motifAddLeftScore(ds, m, background, labels, startPos, mode);
   if((m->mWidth)[mode] == minWidth) values[1] = 0;
+  if(maxWidth != 0 && (m->mWidth)[mode] >= maxWidth) values[2] = 0;
   i = sample(values, 3, ((double)rand_r(seed))/(RAND_MAX));
   if(i == 1) motifLeftDecrease(ds, m, background, labels, startPos, mode);
   else if(i == 2) motifLeftIncrease(ds, m, background, labels, startPos, mode);
+
   free(values);
   return i;
 }
 
 /* Compute the width increase/decrease of a given motif from the right */
-int sampleMotifWidthRight(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, unsigned int *seed){
+int sampleMotifWidthRight(dataSet *ds, model *m, double **background, int *labels, int *startPos, int mode, int minWidth, int maxWidth, unsigned int *seed){
   int i;
   double *values;
   values = (double*)malloc(sizeof(double)*3);
@@ -380,6 +383,7 @@ int sampleMotifWidthRight(dataSet *ds, model *m, double **background, int *label
   values[1] = motifRemoveRightScore(ds, m, background, labels, startPos, mode);
   values[2] = motifAddRightScore(ds, m, background, labels, startPos, mode);  
   if((m->mWidth)[mode] == minWidth) values[1] = 0;
+  if(maxWidth != 0 && (m->mWidth)[mode] >= maxWidth) values[2] = 0;
   i = sample(values, 3, ((double)rand_r(seed))/(RAND_MAX));
   if(i == 2) motifRightIncrease(ds, m, background, labels, startPos, mode);
   else if(i == 1) motifRightDecrease(ds, m, background, labels, startPos, mode);
@@ -411,7 +415,7 @@ double EMLike(model *m, dataSet *ds, int *labels, int *startPos, double **backgr
 }
 
 /* model training */
-trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, char *filename, char *likelihoodInfoFile){
+trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda, double zoops, unsigned int seed, double **background, int *mWidth, int minWidth, int maxWidth, char *filename, char *likelihoodInfoFile){
   double maxLikelihood, tmpLikelihood, *modeLikes;
   int i, j, j1, k, oldLabel, oldStart, flag, count, iterations;
   int *lpc, *spc;
@@ -630,9 +634,9 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
 	  break;
 	}
 	else{
-	  k = sampleMotifWidthLeft(ds, m, background, lpc, spc, i, minWidth, &seed);
+	  k = sampleMotifWidthLeft(ds, m, background, lpc, spc, i, minWidth, maxWidth, &seed);
 	  if(k == 2) flag = 1;
-	  j1 = sampleMotifWidthRight(ds, m, background, lpc, spc, i, minWidth, &seed);
+	  j1 = sampleMotifWidthRight(ds, m, background, lpc, spc, i, minWidth, maxWidth, &seed);
 	  if(j1 == 2) flag = 1;
 	  k = k + j1;
 	}
@@ -695,6 +699,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
       }
     }
   }
+  
 
   copyLabels(widths, m->mWidth, m->mode);
   freeMotifs(m->motifs, m->mode);
@@ -737,7 +742,6 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
 
   /////////////////////////////////////////////
 
-  
 
   j1 = 0;
 

@@ -37,6 +37,7 @@ def printHelp():
     print "\t-r include reverse strand while training. Default 1(include)"
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
+    print "\t-maxWidth maximum motif width. If value is greater than length of sequence then maximum motif width is limited to sequence length. Default no maximum width (can be take up any value more than minWidth)"
     print "\t-initialWidth starting width of motifs. Default 12"
     print "\t-minMode minimum number of modes. Default 3"
     print "\t-maxMode maximum number of modes. Default 10"
@@ -126,8 +127,8 @@ def validDir(s):    # Check if string is a valid directory
 
 # get values from command line and process them and store in dictionary
 def getValues():
-    d = {'-f': '', '-r': defaultReverseStrandFlag, '-fast': defaultFastCount, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
-    dF = {'-f': validFD, '-r': validR, '-fast': validNum, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
+    d = {'-f': '', '-r': defaultReverseStrandFlag, '-fast': defaultFastCount, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-maxWidth': defaultMaxWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
+    dF = {'-f': validFD, '-r': validR, '-fast': validNum, '-a': validNum, '-zoops': validNum1, '-minWidth': validInt, '-maxWidth': validInt, '-o': validFD, '-minMode': validInt, '-maxMode': validInt, '-initialWidth': validInt, '-lcount': validInt, '-proc': validInt, '-maskReps': validR, '-v': validR}
 
     lst = []
     sysargv = (sys.argv)[1:]
@@ -148,6 +149,13 @@ def getValues():
     if(d['-minWidth'] > d['-initialWidth']):
         print "ERROR: -initialWidth cannot be less than -minWidth"
         exit(2)
+    if not(not(d['-maxWidth'])):
+        if d['-maxWidth'] < d['-minWidth']:
+            print "ERROR: -maxWidth cannot be less than -minWidth"
+            exit(2)
+        if d['-maxWidth'] < d['-initialWidth']:
+            print "ERROR: -maxWidth cannot be less than -initialWidth"
+            exit(2)
     if(d['-maxMode'] < d['-minMode']):
         print "ERROR: -maxMode cannot be less than -minMode"
         exit(2)

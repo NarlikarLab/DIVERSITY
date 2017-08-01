@@ -37,6 +37,7 @@ def saveSettings(d):
     f.write("\n\nMaximum number of modes: " + str(d['-maxMode']))
     f.write("\n\nNumber of models to be learnt per mode: " + str(d['-lcount']))
     f.write("\n\nMinimum motif width: " + str(d['-minWidth']))
+    f.write("\n\nMaximum motif width: " + str(d['-maxWidth']))
     f.write("\n\nInitial motif width: " + str(d['-initialWidth']))
     f.write("\n\nMask repeats: ")
     if (d['-maskReps'] == 1): f.write("Yes")
