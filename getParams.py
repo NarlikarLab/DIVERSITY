@@ -38,7 +38,7 @@ def printHelp():
     print "\t-zoops zero or one occurence per sequence. 0 means all sequences must have a motif. 1 means all sequences may not have a motif. Any value between 0 and 1 implies the probability of a sequence not having a motif. Default 0"
     print "\t-minWidth minimum motif width. Default 6"
     print "\t-maxWidth maximum motif width. If value is greater than length of sequence then maximum motif width is limited to sequence length. Default no maximum width (can be take up any value more than minWidth)"
-    print "\t-initialWidth starting width of motifs. Default 12"
+    print "\t-initialWidth starting width of motifs. minWidth becomes initialWidth if minWidth is greater than intialWidth. Default 12"
     print "\t-minMode minimum number of modes. Default 3"
     print "\t-maxMode maximum number of modes. Default 10"
     print "\t-lcount number of models to be learned while training. Best model is considered. Default 5"
@@ -147,8 +147,9 @@ def getValues():
             print "ERROR: Invalid option", s
             printHelp()
     if(d['-minWidth'] > d['-initialWidth']):
-        print "ERROR: -initialWidth cannot be less than -minWidth"
-        exit(2)
+        d['-initialWidth'] = d['-minWidth']
+        # print "ERROR: -initialWidth cannot be less than -minWidth"
+        # exit(2)
     if not(not(d['-maxWidth'])):
         if d['-maxWidth'] < d['-minWidth']:
             print "ERROR: -maxWidth cannot be less than -minWidth"
