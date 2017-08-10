@@ -84,7 +84,7 @@ int bestPosteriorParameters(dataSet *ds, model *m, double *background, int *labe
     s1 = (double)(t[i] + m->alpha)/(n + m->mode*m->alpha);
     for(j = 0; j < (ds->features)[index]; j++){
       s = likelihoodXi(m, ds, i, j, index, background);
-      if(s < 0.00001) s = -1;
+      if(s < 0.0000000000001) s = -1;
       else s = s * s1;
       if(s > max){
     	max = s;
@@ -422,7 +422,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
   motifStruct *m1;
   int *widths;
   int **labelcounts;
-  double c1, *x;
+  double c1 = 1000, *x;
   int oldChangeIndex, motifWidthChange;
   int front, rear, qSize, movingCounter, movingOffset, isFull;
   double qSum, xsum, xxsum, xysum;
@@ -546,7 +546,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
 	if(movingCounter == movingOffset && isFull == qSize){
 	  movingCounter = 0;
 	  c1 = linearSlope(queue, xsum, qSum, xxsum, xysum, qSize);
-	  if((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001)){
+	  if((c1 <= 0 && c1 > -0.001) || (c1 >= 0 && c1 < 0.001)){
 	    flag = 1;
 	  }
 	}
@@ -565,7 +565,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
       if(movingCounter == movingOffset && isFull == qSize){
 	movingCounter = 0;
 	c1 = linearSlope(queue, xsum, qSum, xxsum, xysum, qSize);
-	if((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001)){
+	if((c1 <= 0 && c1 > -0.001) || (c1 >= 0 && c1 < 0.001)){
 	  flag = 1;
 	}
       }
@@ -613,7 +613,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
 
 
     count++;
-    if(j%(ds->n/10) != 0) continue;
+    if(j%(ds->n/10) != 1) continue;
 
     /* Update motif size after every n/10 iteration. So, the motif size would be changed at most 10 times while training */
     if(j < ds->n/10){
@@ -621,7 +621,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
       motifWidthChange = 0;
     }
       /* Check of all  likelihood values lie in a straight line to see if it has converged */
-    if(oldChangeIndex > 0 && motifWidthChange >= 2 && ((c1 < 0 && c1 > -0.001) || (c1 > 0 && c1 < 0.001))) break;
+    if(oldChangeIndex > 0 && motifWidthChange >= 2 && ((c1 <= 0 && c1 > -0.001) || (c1 >= 0 && c1 < 0.001))) break;
 
     oldChangeIndex = j;
     count = 0;
