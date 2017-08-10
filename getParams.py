@@ -154,9 +154,6 @@ def getValues():
         if d['-maxWidth'] < d['-minWidth']:
             print "ERROR: -maxWidth cannot be less than -minWidth"
             exit(2)
-        if d['-maxWidth'] < d['-initialWidth']:
-            print "ERROR: -maxWidth cannot be less than -initialWidth"
-            exit(2)
     if(d['-maxMode'] < d['-minMode']):
         print "ERROR: -maxMode cannot be less than -minMode"
         exit(2)
