@@ -146,8 +146,8 @@ def getValues():
         else:
             print "ERROR: Invalid option", s
             printHelp()
-    if(d['-minWidth'] > d['-initialWidth']):
-        d['-initialWidth'] = d['-minWidth']
+    if(d['-minWidth'] > d['-initialWidth'] or d['-maxWidth'] < d['-initialWidth']):
+        d['-initialWidth'] = (d['-minWidth'] + d['-maxWidth'])/2
         # print "ERROR: -initialWidth cannot be less than -minWidth"
         # exit(2)
     if not(not(d['-maxWidth'])):

@@ -613,7 +613,7 @@ trainOut* trainData(dataSet *ds, int mode, float fast, float alpha, float lambda
 
 
     count++;
-    if(j%(ds->n/10) != 1) continue;
+    if(j%(ds->n/10) != 0) continue;
 
     /* Update motif size after every n/10 iteration. So, the motif size would be changed at most 10 times while training */
     if(j < ds->n/10){
