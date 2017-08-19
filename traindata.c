@@ -333,7 +333,7 @@ int sampleStartPos(model *m, dataSet *ds, int mode, int index, unsigned int *see
     sum = sum + values[i];
     i++;
   }
-  if(sum < 0.00001){
+  if(sum < 0.00000000000001){
     free(values);
     return -1;
   }
