@@ -71,6 +71,21 @@ def getModel(d):
     n = mp.cpu_count()
     if d['-proc'] < n and d['-proc'] > 0: n = d['-proc']
     d['-proc'] = n
+    outfile = d['-o'][1] + "/" + temporaryDataFile
+    ds = libctest.getData(d['-f'], outfile, d['-r'], d['-maskReps'])
+    # checking if average motif width is smaller than initial width
+    avgMotifWidth =  [ds.contents.features[i] for i in range(ds.contents.n)]
+    if d['-r'] == 1: avgMotifWidth = map(lambda x: x/2, avgMotifWidth)
+    maxMotifWidth = max(avgMotifWidth)
+    avgMotifWidth = sum(avgMotifWidth)/ds.contents.n
+    if avgMotifWidth < d['-initialWidth']:
+        d['-initialWidth'] = avgMotifWidth
+    if d['-maxWidth'] > maxMotifWidth:
+        d['-maxWidth'] = maxMotifWidth
+    print avgMotifWidth, d['-initialWidth']
+    if d['-minWidth'] > d['-initialWidth']: d['-minWidth'] = d['-initialWidth']
+
+
     printDetails(d)
     saveSettings(d)
     to = ev.learn(d)

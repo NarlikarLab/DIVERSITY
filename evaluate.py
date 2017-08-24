@@ -139,7 +139,7 @@ def learn(d):
     # call c function getData to read the FASTA file into a structure
     ds = mpc.copy(libctest.getData(d['-f'], outfile, d['-r'], d['-maskReps']))
     background = mpc.copy(libctest.getBackground(ds, c_int(2)))
-    
+
     to = multiEval(d, ds, background, pickleFile)
 
     # return all  the models that have been learned
