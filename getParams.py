@@ -134,7 +134,7 @@ def replaceDegenSeq(fastafile):
         if l[0] == '>':
             continue
         else:
-            for a in l:
+            for a in l.rstrip('\n'):
                 if a not in ['a','c','g','t','A','C','G','T','N']:
                     dflag = 1
                     break
