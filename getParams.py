@@ -157,7 +157,7 @@ def replaceDegenSeq(fastafile):
                 degchars+=t[1]
         nff.close()
         ff.close()
-        print "\nTotal "+str(degchars)+" degenerate characters in sequences replaced by N\n"
+        print "\nTotal "+str(degchars)+" non ACGT characters found. These would be ignored.\n"
         return newfastafile
     else:
         ff.close()
