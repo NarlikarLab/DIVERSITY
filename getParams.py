@@ -125,6 +125,46 @@ def validDir(s):    # Check if string is a valid directory
     else: new = s
     return [old, new, defVal]
 
+
+######### Replace degenerate sequence components if present #########
+def replaceDegenSeq(fastafile):
+    ff = open(fastafile,'r')
+    dflag = 0
+    for l in ff:
+        if l[0] == '>':
+            continue
+        else:
+            for a in l:
+                if a not in ['a','c','g','t','A','C','G','T','N']:
+                    dflag = 1
+                    break
+        if dflag:
+            break
+    
+    if dflag:
+        ff.seek(0)
+        ffcomp = fastafile.split('/')
+        basedir = ffcomp[:-1]
+        newfastafile = '/'.join(basedir) + '/' + ffcomp[-1].split('.fa')[0] + '_new.fasta'
+        degchars = 0
+        nff = open(newfastafile,'w')
+        for l in ff:
+            if l[0]=='>':
+                nff.write(l)
+            else:
+                t = re.subn('[^.acgtACGT]','N',l.rstrip('\n'))
+                nff.write(t[0])
+                degchars+=t[1]
+        nff.close()
+        ff.close()
+        print "\nTotal "+str(degchars)+" degenerate characters in sequences replaced by N\n"
+        return newfastafile
+    else:
+        ff.close()
+        return fastafile
+########## Degenerate sequence components replaced ##########
+
+
 # get values from command line and process them and store in dictionary
 def getValues():
     d = {'-f': '', '-r': defaultReverseStrandFlag, '-fast': defaultFastCount, '-a': defaultAlpha, '-lambda': 0, '-zoops': defaultZOOPS, '-minWidth': defaultMinWidth, '-maxWidth': defaultMaxWidth, '-o': '', '-minMode': defaultMinMode, '-maxMode': defaultMaxMode, '-initialWidth': defaultInitialWidth, '-lcount': defaultLearnCount, '-proc': 0, '-maskReps': defaultMaskReps, '-v': defaultVerbose}
@@ -180,4 +220,7 @@ def getValues():
         except:
             print "ERROR: Cannot create directory" + d['-o'][1] + "/" + modeDir.format(str(i))
     if d['-v'] != 0: d['-v'] = sysargv[-1] + "makeLikelihoodPlot.pg"
+
+    d['-f'] = replaceDegenSeq(d['-f'])
+
     return d
